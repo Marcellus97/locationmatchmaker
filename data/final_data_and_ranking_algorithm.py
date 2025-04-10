@@ -262,7 +262,7 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
 
 # Example
 user_input = {
-    'state':'NEW JERSEY',
+    # 'state':'NEW JERSEY',
     'num_adults': 2,
     'num_children': 1,
     'RISK_VALUE':'',

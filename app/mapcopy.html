@@ -39,7 +39,7 @@
     </select>
 
     <svg id="choropleth" width="1200" height="800"></svg>
-    <div id="tooltip" class="d3-tip"></div>
+    <!-- <div id="tooltip" class="d3-tip"></div> -->
 
     <script type="text/javascript">
       // enter code to define margin and dimensions for svg
@@ -148,61 +148,11 @@
           .data(world.features)
           .enter()
           .append("path")
-          .attr("class", "Country")
+          // .attr("class", "Country")
           // draw each country
           .attr("d", path)
           // set the color of each country
-          .attr("fill", function (d) {
-            var countryName = d.properties.name;
-            var obj = traffickingData.find(
-              (x) => x.country == countryName && x.year == selectedYear
-            );
-            if (obj == null) {
-              return "grey";
-            }
-            return colorScale(obj.incidents);
-          })
-          .on("mouseover", mouseOver)
-          .on("mouseleave", mouseLeave)
           .exit();
-
-        var legend = d3
-          .legendColor()
-          .labelFormat(d3.format(".2f"))
-          // .useClass(true)
-          .scale(colorScale)
-          .labelWrap(30)
-          .title("Legend")
-          .titleWidth(100);
-
-        svg
-          .append("g")
-          .attr("id", "legend")
-          .attr("class", "legendQuant")
-          .attr("transform", "translate(20,20)")
-          .call(legend);
-
-        var tip = d3
-          .tip()
-          .attr("id", "tooltip")
-          .attr("class", "d3-tip")
-          .direction("e")
-          .html((d) => {
-            var obj = traffickingData.find((x) => x.country == countryName);
-            if (obj == null) {
-              return `<div>
-                <div>Country: ${d.properties.name} </div>
-            </div>`;
-            }
-            return
-            `<div>
-                <div>Country: ${obj.country} </div>
-                <div>Year: ${obj.year} </div>
-                <div>Number of Incidents: ${obj.incidents} </div>
-                <div>Average Fine: ${obj.averageFine} </div>
-                <div>Average Imprisonment (Years): ${obj.averageImprisonment} </div>
-            </div>`;
-          });
       }
     </script>
   </body>
