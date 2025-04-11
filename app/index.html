@@ -1,276 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="./css/bootstrap.css" />
-    <script src="./js/bootstrap.bundle.js"></script>
-    <!-- import required libraries here -->
-    <script type="text/javascript" src="/app/lib/d3-dsv.min.js"></script>
-    <script type="text/javascript" src="/app/lib/d3.v5.min.js"></script>
-    <script
-      type="text/javascript"
-      src="/app/lib/d3-geo-projection.v2.min.js"
-    ></script>
-    <script type="text/javascript" src="/app/lib/d3-legend.min.js"></script>
-    <script type="text/javascript" src="/app/lib/d3-tip.min.js"></script>
-    <script type="text/javascript" src="/app/lib/topojson.v2.min.js"></script>
 
-    <title>Sliders Page</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        display: flex;
-        height: 100vh;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      .left-section {
-        width: 300px;
-        background-color: #f0f0f0;
-        padding: 20px;
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-      }
+  <link rel="stylesheet" href="css/anythingzoomer.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+  <script src="js/jquery.anythingzoomer.min.js"></script>
 
-      .right-section {
-        flex: 1;
-        background-color: #ffffff;
-        padding: 20px;
-      }
+  <link href="./css/bootstrap.css" rel="stylesheet" />
+  <script src="./js/bootstrap.bundle.js"></script>
+  <!-- import required libraries here -->
+  <script type="text/javascript" src="/app/lib/d3-dsv.min.js"></script>
+  <script type="text/javascript" src="/app/lib/d3.v5.min.js"></script>
+  <script type="text/javascript" src="/app/lib/d3-geo-projection.v2.min.js"></script>
+  <script type="text/javascript" src="/app/lib/d3-legend.min.js"></script>
+  <script type="text/javascript" src="/app/lib/d3-tip.min.js"></script>
+  <script type="text/javascript" src="/app/lib/topojson.v2.min.js"></script>
 
-      .slider-container {
-        margin-bottom: 20px;
-      }
+  <title>Sliders Page</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
 
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-      }
+    .left-section {
+      width: 300px;
+      background-color: #f0f0f0;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
 
-      input[type="range"] {
-        width: 100%;
-      }
+    .right-section {
+      flex: 1;
+      background-color: #ffffff;
+      padding: 20px;
+    }
 
-      .value-display {
-        margin-top: 5px;
-        font-size: 0.9em;
-        color: #333;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="left-section">
-      <div class="slider-container">
-        <label for="walkability">Walkability</label>
-        <input
-          type="range"
-          id="walkability"
-          name="walkability"
-          min="0"
-          max="10"
-          step="1"
-          oninput="updateValue('walkability')"
-        />
-        <div class="value-display" id="walkability-value">5</div>
-      </div>
-      <div class="slider-container">
-        <label for="density">Density</label>
-        <input
-          type="range"
-          id="density"
-          name="density"
-          min="0"
-          max="10"
-          step="1"
-          oninput="updateValue('density')"
-        />
-        <div class="value-display" id="density-value">5</div>
-      </div>
-      <div class="slider-container">
-        <label for="warm-weather">Warm Weather</label>
-        <input
-          type="range"
-          id="warm-weather"
-          name="warm-weather"
-          min="0"
-          max="10"
-          step="1"
-          oninput="updateValue('warm-weather')"
-        />
-        <div class="value-display" id="warm-weather-value">5</div>
-      </div>
-      <div class="slider-container">
-        <label for="rain">Rain</label>
-        <input
-          type="range"
-          id="rain"
-          name="rain"
-          min="0"
-          max="10"
-          step="1"
-          oninput="updateValue('rain')"
-        />
-        <div class="value-display" id="rain-value">5</div>
-      </div>
-      <div class="slider-container">
-        <label for="housing-price">Housing Price</label>
-        <input
-          type="range"
-          id="housing-price"
-          name="housing-price"
-          min="0"
-          max="10"
-          step="1"
-          oninput="updateValue('housing-price')"
-        />
-        <div class="value-display" id="housing-price-value">5</div>
-      </div>
-      <div class="slider-container">
-        <label for="job-prospects">Job Prospects</label>
-        <input
-          type="range"
-          id="job-prospects"
-          name="job-prospects"
-          min="0"
-          max="10"
-          step="1"
-          oninput="updateValue('job-prospects')"
-        />
-        <div class="value-display" id="job-prospects-value">5</div>
-      </div>
+    .slider-container {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .value-display {
+      margin-top: 5px;
+      font-size: 0.9em;
+      color: #333;
+    }
+
+    .az-overlay {
+      background-color: #000;
+      opacity: 0.3;
+      filter: alpha(opacity=30);
+      z-index: 10;
+    }
+
+    .img-magnifier-container {
+      position: relative;
+    }
+
+    .img-magnifier-glass {
+      position: absolute;
+      border: 3px solid #000;
+      border-radius: 50%;
+      cursor: none;
+      /*Set the size of the magnifier glass:*/
+      width: 100px;
+      height: 100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="left-section">
+    <div class="slider-container">
+      <label for="walkability">Walkability</label>
+      <input type="range" id="walkability" name="walkability" min="0" max="10" step="1"
+        oninput="updateValue('walkability')" />
+      <div class="value-display" id="walkability-value">5</div>
     </div>
-    <div class="right-section">
-      <h1>Welcome</h1>
-      <p>
-        This is the right section of the page. You can use the sliders on the
-        left to adjust your preferences.
-      </p>
-      <svg id="choropleth" width="1200" height="800"></svg>
+    <div class="slider-container">
+      <label for="density">Density</label>
+      <input type="range" id="density" name="density" min="0" max="10" step="1" oninput="updateValue('density')" />
+      <div class="value-display" id="density-value">5</div>
+    </div>
+    <div class="slider-container">
+      <label for="warm-weather">Warm Weather</label>
+      <input type="range" id="warm-weather" name="warm-weather" min="0" max="10" step="1"
+        oninput="updateValue('warm-weather')" />
+      <div class="value-display" id="warm-weather-value">5</div>
+    </div>
+    <div class="slider-container">
+      <label for="rain">Rain</label>
+      <input type="range" id="rain" name="rain" min="0" max="10" step="1" oninput="updateValue('rain')" />
+      <div class="value-display" id="rain-value">5</div>
+    </div>
+    <div class="slider-container">
+      <label for="housing-price">Housing Price</label>
+      <input type="range" id="housing-price" name="housing-price" min="0" max="10" step="1"
+        oninput="updateValue('housing-price')" />
+      <div class="value-display" id="housing-price-value">5</div>
+    </div>
+    <div class="slider-container">
+      <label for="job-prospects">Job Prospects</label>
+      <input type="range" id="job-prospects" name="job-prospects" min="0" max="10" step="1"
+        oninput="updateValue('job-prospects')" />
+      <div class="value-display" id="job-prospects-value">5</div>
+    </div>
+  </div>
+  <div class="right-section">
+    <h1>Welcome</h1>
+    <p>
+      This is the right section of the page. You can use the sliders on the
+      left to adjust your preferences.
+    </p>
+
+    <div id="zoom" class="img-magnifier-container">
+      <svg id="usa"></svg>
     </div>
 
-    <script>
-      function updateValue(id) {
-        const slider = document.getElementById(id);
-        const display = document.getElementById(id + "-value");
-        display.textContent = slider.value;
-      }
+  <script>
 
-      // Set initial display values
-      window.onload = function () {
-        const ids = [
-          "walkability",
-          "density",
-          "warm-weather",
-          "rain",
-          "housing-price",
-          "job-prospects",
-        ];
-        ids.forEach((id) => updateValue(id));
-      };
+    function updateValue(id) {
+      const slider = document.getElementById(id);
+      const display = document.getElementById(id + "-value");
+      display.textContent = slider.value;
+    }
 
-      /*  D3.JS MAP CODE */
-      var margin = 20;
-      var width = 1200;
-      var height = 800;
-      var path = d3.geoPath();
+    // Set initial display values
+    window.onload = function () {
+      const ids = [
+        "walkability",
+        "density",
+        "warm-weather",
+        "rain",
+        "housing-price",
+        "job-prospects",
+      ];
+      ids.forEach((id) => updateValue(id));
+    };
 
-      var countyStatesPromise = d3.json("/app/json/counties-albers-10m.json");
-      var ranksPromise = d3.csv("/data/final_data_rank.csv");
+    /*  D3.JS MAP CODE */
+    var margin = 20;
+    var width = 1200;
+    var height = 800;
+    var path = d3.geoPath();
 
-      Promise.all([countyStatesPromise, ranksPromise]).then(ready);
+    var countyStatesPromise = d3.json("/app/json/counties-albers-10m.json");
+    var ranksPromise = d3.csv("/data/final_data_rank.csv");
 
-      function ready(values) {
-        var countryStates = values[0];
-        var ranks = values[1];
-        console.log("ranks ", values[1]);
-        createMap(countryStates, ranks);
-      }
+    Promise.all([countyStatesPromise, ranksPromise]).then(ready);
 
-      function createMap(countryStates, ranks) {
-        console.log(countryStates);
-        // testing this for filtering
-        // clone the object
-        var filtered = structuredClone(countryStates);
-        filtered.objects.counties.geometries =
-          filtered.objects.counties.geometries.filter(
-            (d) => d.properties.name == "Butler"
-          );
+    function ready(values) {
+      var countryStates = values[0];
+      var ranks = values[1];
+      console.log("ranks ", values[1]);
+      createMap(countryStates, ranks);
+    }
 
-        let countyNames = countryStates.objects.counties.geometries.map(
-          (d) =>
-            // return {
-            //   id : d[""],
-            // name : d.properties.name.toLowerCase()
-
-            // turns "Crème Brûlée" into "Creme Brulee"
-            d.properties.name
-              .normalize("NFKD")
-              .replace(/[\u0300-\u036f]/g, "")
-              .toLowerCase()
-          // }
+    function createMap(countryStates, ranks) {
+      console.log(countryStates);
+      // testing this for filtering
+      // clone the object
+      var filtered = structuredClone(countryStates);
+      filtered.objects.counties.geometries =
+        filtered.objects.counties.geometries.filter(
+          (d) => d.properties.name == "Butler"
         );
-        let missing = [];
 
-        // normalize string accents
-        //https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
-        console.log(ranks);
-        console.log(countyNames);
-        ranks.forEach((r) => {
-          let name = r["COUNTY_Name"].toLowerCase();
-          let name2 = r["COUNTY"].toLowerCase();
-          if (!countyNames.includes(name) && !countyNames.includes(name2)) {
-            missing.push(r);
-          }
-        });
-        console.log(missing);
+      let countyNames = countryStates.objects.counties.geometries.map(
+        (d) =>
+          // return {
+          //   id : d[""],
+          // name : d.properties.name.toLowerCase()
 
-        var svg = d3
-          .select("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("viewBox", [0, 0, width, height])
-          .attr("style", "max-width: 100%; height: auto;");
+          // turns "Crème Brûlée" into "Creme Brulee"
+          d.properties.name
+            .normalize("NFKD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+        // }
+      );
+      let missing = [];
 
-        svg
-          .append("g")
-          .selectAll("path")
-          .data(
-            topojson.feature(countryStates, countryStates.objects.counties)
-              .features
-          )
-          .enter()
-          .append("path")
-          .attr("d", path)
-          .attr("fill", "none")
-          .attr("stroke", "#ddd")
-          .exit();
+      // normalize string accents
+      //https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
+      console.log(ranks);
+      console.log(countyNames);
+      ranks.forEach((r) => {
+        let name = r["COUNTY_Name"].toLowerCase();
+        let name2 = r["COUNTY"].toLowerCase();
+        if (!countyNames.includes(name) && !countyNames.includes(name2)) {
+          missing.push(r);
+        }
+      });
+      console.log(missing);
 
-        svg
-          .append("g")
-          .selectAll("path")
-          .data(topojson.feature(filtered, filtered.objects.counties).features)
-          .enter()
-          .append("path")
-          .attr("d", path)
-          .attr("fill", "#afa")
-          .attr("stroke", "black")
-          .exit();
+      var svg = d3
+        .select("#usa")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", [0, 0, width, height])
+        .attr("style", "max-width: 100%; height: auto;")
+      // .attr('viewBox', "0 0 " + 225 + " " + 225);
 
-        svg
-          .append("g")
-          .selectAll("path")
-          .data(
-            topojson.feature(countryStates, countryStates.objects.states)
-              .features
-          )
-          .enter()
-          .append("path")
-          .attr("d", path)
-          .attr("fill", "none")
-          .attr("stroke", "black")
-          .exit();
+      svg
+        .append("g")
+        .attr("id", "counties")
+        .selectAll("path")
+        .data(
+          topojson.feature(countryStates, countryStates.objects.counties)
+            .features
+        )
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("fill", "none")
+        .attr("stroke", "#ddd")
+        .exit();
+
+      svg
+        .append("g")
+        .attr("id", "selectedCounties")
+        .selectAll("path")
+        .data(topojson.feature(filtered, filtered.objects.counties).features)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("fill", "#afa")
+        .attr("stroke", "black")
+        .exit();
+
+      svg
+        .append("g")
+        .attr("id", "states")
+        .selectAll("path")
+        .data(
+          topojson.feature(countryStates, countryStates.objects.states)
+            .features
+        )
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("fill", "none")
+        .attr("stroke", "black")
+        .exit();
+    }
+
+    // $("#zoom").anythingZoomer({
+    //   clone: true
+    // });
+
+    function magnify(imgID, zoom) {
+      var img, glass, w, h, bw;
+      img = document.getElementById(imgID);
+
+      /* Create magnifier glass: */
+      glass = document.createElement("DIV");
+      glass.setAttribute("class", "img-magnifier-glass");
+
+      /* Insert magnifier glass: */
+      img.parentElement.insertBefore(glass, img);
+
+      /* Set background properties for the magnifier glass: */
+      glass.style.backgroundImage = "url('" + img.src + "')";
+      glass.style.backgroundRepeat = "no-repeat";
+      glass.style.backgroundSize = (img.width * zoom) + "px " + (img.height * zoom) + "px";
+      bw = 3;
+      w = glass.offsetWidth / 2;
+      h = glass.offsetHeight / 2;
+
+      /* Execute a function when someone moves the magnifier glass over the image: */
+      glass.addEventListener("mousemove", moveMagnifier);
+      img.addEventListener("mousemove", moveMagnifier);
+
+      /*and also for touch screens:*/
+      glass.addEventListener("touchmove", moveMagnifier);
+      img.addEventListener("touchmove", moveMagnifier);
+      function moveMagnifier(e) {
+        var pos, x, y;
+        /* Prevent any other actions that may occur when moving over the image */
+        e.preventDefault();
+        /* Get the cursor's x and y positions: */
+        pos = getCursorPos(e);
+        x = pos.x;
+        y = pos.y;
+        /* Prevent the magnifier glass from being positioned outside the image: */
+        if (x > img.width - (w / zoom)) { x = img.width - (w / zoom); }
+        if (x < w / zoom) { x = w / zoom; }
+        if (y > img.height - (h / zoom)) { y = img.height - (h / zoom); }
+        if (y < h / zoom) { y = h / zoom; }
+        /* Set the position of the magnifier glass: */
+        glass.style.left = (x - w) + "px";
+        glass.style.top = (y - h) + "px";
+        /* Display what the magnifier glass "sees": */
+        glass.style.backgroundPosition = "-" + ((x * zoom) - w + bw) + "px -" + ((y * zoom) - h + bw) + "px";
       }
-    </script>
-  </body>
+
+      function getCursorPos(e) {
+        var a, x = 0, y = 0;
+        e = e || window.event;
+        /* Get the x and y positions of the image: */
+        a = img.getBoundingClientRect();
+        /* Calculate the cursor's x and y coordinates, relative to the image: */
+        x = e.pageX - a.left;
+        y = e.pageY - a.top;
+        /* Consider any page scrolling: */
+        x = x - window.pageXOffset;
+        y = y - window.pageYOffset;
+        return { x: x, y: y };
+      }
+    }
+
+    magnify("usa", 3);
+
+  </script>
+</body>
+
 </html>
