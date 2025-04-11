@@ -16,7 +16,6 @@
     <script type="text/javascript" src="/app/lib/d3-tip.min.js"></script>
     <script type="text/javascript" src="/app/lib/topojson.v2.min.js"></script>
 
-
     <title>Sliders Page</title>
     <style>
       body {
@@ -64,32 +63,80 @@
     <div class="left-section">
       <div class="slider-container">
         <label for="walkability">Walkability</label>
-        <input type="range" id="walkability" name="walkability" min="0" max="10" step="1" oninput="updateValue('walkability')" />
+        <input
+          type="range"
+          id="walkability"
+          name="walkability"
+          min="0"
+          max="10"
+          step="1"
+          oninput="updateValue('walkability')"
+        />
         <div class="value-display" id="walkability-value">5</div>
       </div>
       <div class="slider-container">
         <label for="density">Density</label>
-        <input type="range" id="density" name="density" min="0" max="10" step="1" oninput="updateValue('density')" />
+        <input
+          type="range"
+          id="density"
+          name="density"
+          min="0"
+          max="10"
+          step="1"
+          oninput="updateValue('density')"
+        />
         <div class="value-display" id="density-value">5</div>
       </div>
       <div class="slider-container">
         <label for="warm-weather">Warm Weather</label>
-        <input type="range" id="warm-weather" name="warm-weather" min="0" max="10" step="1" oninput="updateValue('warm-weather')" />
+        <input
+          type="range"
+          id="warm-weather"
+          name="warm-weather"
+          min="0"
+          max="10"
+          step="1"
+          oninput="updateValue('warm-weather')"
+        />
         <div class="value-display" id="warm-weather-value">5</div>
       </div>
       <div class="slider-container">
         <label for="rain">Rain</label>
-        <input type="range" id="rain" name="rain" min="0" max="10" step="1" oninput="updateValue('rain')" />
+        <input
+          type="range"
+          id="rain"
+          name="rain"
+          min="0"
+          max="10"
+          step="1"
+          oninput="updateValue('rain')"
+        />
         <div class="value-display" id="rain-value">5</div>
       </div>
       <div class="slider-container">
         <label for="housing-price">Housing Price</label>
-        <input type="range" id="housing-price" name="housing-price" min="0" max="10" step="1" oninput="updateValue('housing-price')" />
+        <input
+          type="range"
+          id="housing-price"
+          name="housing-price"
+          min="0"
+          max="10"
+          step="1"
+          oninput="updateValue('housing-price')"
+        />
         <div class="value-display" id="housing-price-value">5</div>
       </div>
       <div class="slider-container">
         <label for="job-prospects">Job Prospects</label>
-        <input type="range" id="job-prospects" name="job-prospects" min="0" max="10" step="1" oninput="updateValue('job-prospects')" />
+        <input
+          type="range"
+          id="job-prospects"
+          name="job-prospects"
+          min="0"
+          max="10"
+          step="1"
+          oninput="updateValue('job-prospects')"
+        />
         <div class="value-display" id="job-prospects-value">5</div>
       </div>
     </div>
@@ -105,16 +152,22 @@
     <script>
       function updateValue(id) {
         const slider = document.getElementById(id);
-        const display = document.getElementById(id + '-value');
+        const display = document.getElementById(id + "-value");
         display.textContent = slider.value;
       }
 
       // Set initial display values
       window.onload = function () {
-        const ids = ['walkability', 'density', 'warm-weather', 'rain', 'housing-price', 'job-prospects'];
-        ids.forEach(id => updateValue(id));
+        const ids = [
+          "walkability",
+          "density",
+          "warm-weather",
+          "rain",
+          "housing-price",
+          "job-prospects",
+        ];
+        ids.forEach((id) => updateValue(id));
       };
-
 
       /*  D3.JS MAP CODE */
       var margin = 20;
