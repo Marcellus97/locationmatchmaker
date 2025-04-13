@@ -43,7 +43,7 @@ project-root/
 If you don't already have a Dockerfile, create one in your project root with the following content:
 
 ```dockerfile
-FROM python:3.9-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -83,73 +83,7 @@ services:
     command: python data/api.py
 ```
 
-### 3. Update API File for Relative Paths
-
-Modify your `api.py` file to use relative paths instead of absolute paths:
-
-```python
-import flask
-import requests
-import pandas as pd
-import os
-from flask import request, jsonify
-from final_data_and_ranking_algorithm import compute_ranking
-
-app = flask.Flask(__name__)
-app.config["DEBUG"] = True
-
-# Get the directory where this script is located
-script_dir = os.path.dirname(os.path.abspath(__file__))
-
-# Load data files relative to the script location
-static_merged_data = pd.read_excel(os.path.join(script_dir, "merged_data.xlsx"))
-cost_of_living_data = pd.read_excel(os.path.join(script_dir, "cost_of_living_data.xlsx"))
-
-@app.route("/api/ranking", methods=["POST"])
-def get_ranking():
-    user_input = request.get_json()
-    
-    if not user_input:
-        return jsonify({"error": "No data provided"}), 400
-
-    try:
-        result = compute_ranking(static_merged_data, cost_of_living_data, user_input)
-        
-        result_json = result.to_dict(orient='records')
-        return jsonify({"results": result_json})
-        
-    except Exception as e:
-        import traceback
-        return jsonify({
-            "error": str(e),
-            "traceback": traceback.format_exc()
-        }), 500
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
-```
-
-### 4. Fix Ranking Algorithm Module
-
-Update your `final_data_and_ranking_algorithm.py` to have test code inside an `if __name__ == "__main__":` block:
-
-```python
-# Make sure all your core functionality is in functions
-def compute_ranking(static_merged_data, cost_of_living_data, user_input):
-    # Your algorithm code here
-    # ...
-
-# Only run this code when executed directly, not when imported
-if __name__ == "__main__":
-    # Test code here
-    # Example:
-    import pandas as pd
-    static_merged_data = pd.read_excel("merged_data.xlsx")
-    cost_of_living_data = pd.read_excel("cost_of_living_data.xlsx")
-    # ...
-```
-
-### 5. Build and Start the Container
+### 3. Build and Start the Container
 
 From your project root directory, run:
 
