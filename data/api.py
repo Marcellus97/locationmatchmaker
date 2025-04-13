@@ -1,6 +1,7 @@
 import flask
 import requests
 import pandas as pd
+import os
 from flask import request, jsonify
 from final_data_and_ranking_algorithm import compute_ranking
 
@@ -8,9 +9,10 @@ from final_data_and_ranking_algorithm import compute_ranking
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-static_merged_data = pd.read_excel("merged_data.xlsx")
-cost_of_living_data = pd.read_excel("cost_of_living_data.xlsx")
+static_merged_data = pd.read_excel(os.path.join(script_dir, "merged_data.xlsx"))
+cost_of_living_data = pd.read_excel(os.path.join(script_dir, "cost_of_living_data.xlsx"))
 
 @app.route("/api/ranking", methods=["POST"])
 def get_ranking():
