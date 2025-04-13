@@ -5,6 +5,7 @@ import re
 # IMPORT DATA
 nri = pd.read_csv("NRI_Table_Counties/NRI_Table_Counties.csv")
 chr = pd.read_csv("analytic_data2025.csv", low_memory=False, header = 1)
+walkability = pd.read_csv("walkability.csv")
 al_avg_temp = pd.read_csv("al_avgtemp.csv",  header = 4)
 al_max_temp = pd.read_csv("al_maxtemp.csv",  header = 4)
 al_min_temp = pd.read_csv("al_mintemp.csv",  header = 4)
@@ -16,7 +17,14 @@ min_temp = pd.read_csv("min_temp.csv",  header = 4)
 precipitation = pd.read_csv("precipitation.csv",  header = 4)
 unemployment_data = pd.read_excel("unemployment_rate_usa.xlsx")
 crime = pd.read_csv("crime_data_w_population_and_crime_rate.csv")
-county_market = pd.read_csv("county_market_tracker.tsv000", sep='\t')
+county_market = pd.read_csv("county_market_tracker.tsv000", sep='\t', low_memory=True)
+fipscode = pd.read_excel("fipscode.xlsx")
+
+# FIPSCODE
+fipscode['fipscode'] = fipscode['fipscode'].astype(str).str.zfill(5)
+fipscode['County'] = fipscode['County'].str.replace(' County', '', regex=True).str.strip()
+fipscode = fipscode[fipscode['State'] != fipscode['County']]
+fipscode = fipscode.rename(columns={'State': 'STATE','County': 'COUNTY'})
 
 # HAZARD DATA
 nri = nri[nri["COUNTYTYPE"] != "City"]
@@ -33,7 +41,7 @@ state_names = [
     'VIRGINIA', 'WASHINGTON', 'WEST VIRGINIA', 'WISCONSIN', 'WYOMING'
 ]
 
-health = chr[["state", "county", "v132_rawvalue", "v133_rawvalue", "v004_rawvalue", 
+health = chr[["state", "county", "fipscode", "v132_rawvalue", "v133_rawvalue", "v004_rawvalue", 
               "v125_rawvalue", "v166_rawvalue", "v147_rawvalue", "v156_rawvalue",
               "v153_rawvalue", "v179_rawvalue"]]
 health = health.rename(columns = {"state":"STATEABBRV",
@@ -54,6 +62,15 @@ health['COUNTY'] = health['COUNTY'].str.upper().str.strip()
 health = health[~health['COUNTY'].isin(state_names)]
 
 health = health[~health['COUNTY'].str.contains('city', case=False, na=False)]
+health['fipscode'] = health['fipscode'].astype(str).str.zfill(5)
+
+# WALKABILITY
+walkability = walkability[["STATEFP", "COUNTYFP", "NatWalkInd"]]
+walkability = walkability[walkability['STATEFP'].astype(int) < 57]
+walkability['fipscode'] = walkability['STATEFP'].astype(str).str.zfill(2) + walkability['COUNTYFP'].astype(str).str.zfill(3)
+walkability = walkability.drop(columns = ["STATEFP", "COUNTYFP"])
+walkability = walkability.groupby('fipscode').mean(numeric_only=True).reset_index()
+
 
 # AVERAGE TEMPERATURE DATA
 avg_temp = pd.concat([avg_temp, al_avg_temp], ignore_index=True)
@@ -143,7 +160,7 @@ county_market = county_market[~county_market['COUNTY'].str.contains('city', case
 
 # JOIN ALL DATASETS
 # List of all DataFrames
-dfs = [hazard_data, health, avg_temp, max_temp, min_temp, precipitation,cost_of_living_data,unemployment_data, crime, county_market]
+dfs = [hazard_data, health, fipscode, walkability, avg_temp, max_temp, min_temp, precipitation,cost_of_living_data,unemployment_data, crime, county_market]
 
 state_abbrev_dict = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
@@ -211,8 +228,15 @@ def clean_county_names(df):
 # Apply the cleaning function to each DataFrame
 dfs = [clean_county_names(df) for df in dfs]
 
+fipscode.loc[:, 'COUNTY'] = fipscode['COUNTY'].str.replace(pattern, '', regex=True).str.strip()
+fipscode.loc[:, 'COUNTY'] = (fipscode['COUNTY'].str.upper().str.replace(r'[^A-Z]', '', regex=True))
+fipscode_data = pd.merge(fipscode, walkability, on=["fipscode"], how="left")
+fipscode_data = pd.merge(fipscode_data, health, on=["fipscode", "STATE", "STATEABBRV", "COUNTY"], how="outer", suffixes=('', '_right'))
+fipscode_data['COUNTY_Name'] = fipscode_data['COUNTY_Name'].fillna(fipscode_data['COUNTY_Name_right'])
+fipscode_data.drop(columns=['COUNTY_Name_right'], inplace=True)
+
 # MERGE - Merge all datasets, remove duplicates and any rows where the STATE is not in the state_names list
-merged = pd.merge(hazard_data, health, on=["STATE","STATEABBRV", "COUNTY"], how="outer", suffixes=('', '_right'))
+merged = pd.merge(fipscode_data, hazard_data, on=["STATE","STATEABBRV", "COUNTY"], how="outer", suffixes=('', '_right'))
 merged['COUNTY_Name'] = merged['COUNTY_Name'].fillna(merged['COUNTY_Name_right'])
 merged.drop(columns=['COUNTY_Name_right'], inplace=True)
 merged = pd.merge(merged, avg_temp, on=["STATE","STATEABBRV", "COUNTY"], how="outer", suffixes=('', '_right'))
