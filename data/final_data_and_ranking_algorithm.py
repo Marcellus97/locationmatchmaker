@@ -1,9 +1,12 @@
 import pandas as pd
 import numpy as np
+import os
 from sklearn.preprocessing import MinMaxScaler
 
-cost_of_living_data = pd.read_excel("cost_of_living_data.xlsx")
-merged_data = pd.read_excel("merged_data.xlsx")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+static_merged_data = pd.read_excel(os.path.join(script_dir, "merged_data.xlsx"))
+cost_of_living_data = pd.read_excel(os.path.join(script_dir, "cost_of_living_data.xlsx"))
 
 
 def compute_ranking(static_merged_data, cost_of_living_data, user_input):
@@ -340,6 +343,6 @@ user_input = {
 }
 
 
-result_within_state = compute_ranking(merged_data, cost_of_living_data, user_input)
+# result_within_state = compute_ranking(merged_data, cost_of_living_data, user_input)
 
-print(result_within_state)
+# print(result_within_state)
