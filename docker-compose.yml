@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "8080:8080"  # Expose the web app port
+    volumes:
+      - ./data:/app/data  # Mount data directory for live updates
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python data/api.py

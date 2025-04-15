@@ -1,15 +1,18 @@
 import pandas as pd
 import numpy as np
+import os
 from sklearn.preprocessing import MinMaxScaler
 
-cost_of_living_data = pd.read_excel("./silver/cost_of_living_data.xlsx")
-merged_data = pd.read_excel("./silver/merged_data.xlsx")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+static_merged_data = pd.read_excel(os.path.join(script_dir, "silver/merged_data.xlsx"))
+cost_of_living_data = pd.read_excel(os.path.join(script_dir, "silver/cost_of_living_data.xlsx"))
 
 
 def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     # MERGE - Cost of living data with rest of the data to create the final dataset
-    num_adults = user_input['num_adults']
-    num_children = user_input['num_children']
+    num_adults = int(user_input.get('num_adults') or 1)
+    num_children = int(user_input.get('num_children') or 1)
 
     family_size = f"{num_adults}p{num_children}c"
     cost_of_living_data = cost_of_living_data[cost_of_living_data['Family'] == family_size]
@@ -118,14 +121,50 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     
     # Rows with NAs for some columns
     rows_with_na = df[df.isnull().any(axis=1)].copy()
+    # Compute min-max of each variable in data - dynamic based on user input of state and family size
+    
+    # Define rating order for categorical columns
+    rating_order = {
+        'Very Low': 1,
+        'Relatively Low ': 2,
+        'Relatively Moderate': 3,
+        'Relatively High ': 4,
+        'Very High': 5
+    }
+
+    df['RISK_RATNG'] = df['RISK_RATNG'].apply(
+    lambda x: rating_order.get(str(x).strip().title(), None) if pd.notna(x) else None)
+
+    df['RESL_RATNG'] = df['RESL_RATNG'].apply(
+        lambda x: rating_order.get(str(x).strip().title(), None) if pd.notna(x) else None)
+
+    min_max = df[['RISK_VALUE','RISK_SCORE','RISK_SPCTL',
+                  'RISK_RATNG','RESL_RATNG',
+                  'RESL_VALUE','RESL_SCORE','RESL_SPCTL',
+                  'Monthly_Childcare','Monthly_Food','Monthly_Healthcare',
+                  'Monthly_Housing','Monthly_Other Necessities ','Monthly_Taxes',
+                  'Monthly_Total','Monthly_Transportation','Access to Exercise Opportunities',
+                  'Food Environment Index','Primary Care Physicians','Air Pollution: Particulate Matter',
+                  'Broadband Access','Life Expectancy','Traffic Volume',
+                  'Homeownership','Access to Parks','Average Temperature F',
+                  'Maximum Temperature F','Minimum Temperature F','Precipitation_inches',
+                  'median_sale_price','median_list_price','median_ppsf',
+                  'homes_sold','new_listings','inventory',
+                  'months_of_supply','median_dom_months','Unemployment_Rate',
+                  'crime_rate_per_100000']].agg(['min', 'max']).transpose()
+    
+    print(min_max)
     # Exports ranked data to excel 
-    df.to_excel('./gold/final_dataset.xlsx')
+    df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
 
     # Filter by state if provided
-    if 'state' in user_input:
-        state = user_input['state']
-        df = df[df['STATE'].str.upper() == state.upper()].copy()
-    
+    state = user_input.get('state', '').strip()
+
+    # Only apply the filter if a valid state is entered and matches data
+    if state:
+        filtered_df = df[df['STATE'].str.upper() == state.upper()].copy()
+        if not filtered_df.empty:
+            df = filtered_df
     # Remove these from user input as we have filtered by state and family
     # Keep only the feature that will be used to rank the county
     excluded_keys = ['state', 'num_adults', 'num_children', 'RISK_RATNG', 'RESL_RATNG']
@@ -135,7 +174,6 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
         if pd.notna(v) and v != '' and k not in excluded_keys
     }
     features = list(cleaned_input.keys()) 
-    print(features)
     
     # RANKING LOGIC
 
@@ -181,16 +219,14 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
         'crime_rate_per_100000':-1
     }
 
-    # Define rating order for categorical columns
-    rating_order = {
-        'Very Low': 1,
-        'Relatively Low ': 2,
-        'Relatively Moderate': 3,
-        'Relatively High ': 4,
-        'Very High': 5
-    }
-
     if features:
+    # Drop rows if any of the features are 0    
+        df = df.copy()
+        required_features = ['Life Expectancy', 'Homeownership', 'POPULATION', 'Average Temperature F', 'Maximum Temperature F',
+                             'Minimum Temperature F', 'median_sale_price', 'median_list_price', 'median_ppsf', 'Monthly_Housing',
+                             'Monthly_Food', 'Monthly_Transportation', 'Monthly_Healthcare', 'Monthly_Other Necessities ', 
+                             'Monthly_Childcare', 'Monthly_Taxes', 'Monthly_Total'] 
+        df = df[(df[required_features] != 0).all(axis=1)]
     # Normalize numeric features
         scaler = MinMaxScaler()
         df[features] = scaler.fit_transform(df[features])
@@ -199,6 +235,7 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
             col_min = scaler.data_min_[i]
             col_max = scaler.data_max_[i]
             user_val = user_input[col]
+            user_val = float(user_val)
             user_input_normalized[col] = (user_val - col_min) / (col_max - col_min)
 
         # Compute directional similarity scores
@@ -213,7 +250,6 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
         variances = df[score_cols].var()
         total_var = variances.sum()
         weights = {col: variances[col + '_score'] / total_var for col in features}
-
         df['ranking_score'] = sum(df[col + '_score'] * weights[col] for col in features)
     else:
         # Fallback to equal weight on all numeric columns (with direction)
@@ -252,7 +288,9 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     df['rank'] = df['ranking_score'].rank(ascending=False, method='dense')
    
     # Exports ranked data to excel 
-    df.to_excel('./gold/final_data_rank.xlsx')
+    # df.to_excel('./gold/final_data_rank.xlsx')
+    # print()
+    df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
 
     # Find the county that ranked no.1
     county_list = df[df['rank'] == 1][['STATE','COUNTY', 'rank']].reset_index(drop=True)
@@ -263,8 +301,8 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
 # Example
 user_input = {
     'state':'NEW JERSEY',
-    'num_adults': 2,
-    'num_children': 1,
+    'num_adults': '',
+    'num_children': '',
     'RISK_VALUE':'',
     'RISK_SCORE':'',
     'RISK_SPCTL':'',
@@ -274,7 +312,7 @@ user_input = {
     'RESL_SPCTL':'',
     'RESL_RATNG':'',
     'Monthly_Childcare':'',
-    'Monthly_Food':'', 
+    'Monthly_Food':'1000', 
     'Monthly_Healthcare':'',
     'Monthly_Housing':'',
     'Monthly_Other Necessities ' :'',
@@ -294,7 +332,7 @@ user_input = {
     'Maximum Temperature F':'',
     'Minimum Temperature F':'',
     'Precipitation_inches':'',
-    'median_sale_price':'',
+    'median_sale_price':'300000',
     'median_list_price':'',
     'median_ppsf':'',
     'homes_sold':'',
@@ -307,6 +345,6 @@ user_input = {
 }
 
 
-result_within_state = compute_ranking(merged_data, cost_of_living_data, user_input)
+# result_within_state = compute_ranking(merged_data, cost_of_living_data, user_input)
 
-print(result_within_state)
+# print(result_within_state)
