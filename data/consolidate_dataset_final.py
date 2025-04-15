@@ -8,20 +8,20 @@ import re
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 nri = pd.read_csv(os.path.join(script_dir,"bronze/NRI_Table_Counties/NRI_Table_Counties.csv"))
-chr = pd.read_csv(os.path.join(script_dir,"bronze/analytic_data2025.csv", low_memory=False, header = 1))
+chr = pd.read_csv(os.path.join(script_dir,"bronze/analytic_data2025.csv"), low_memory=False, header = 1)
 walkability = pd.read_csv(os.path.join(script_dir,"bronze/walkability.csv"))
-al_avg_temp = pd.read_csv(os.path.join(script_dir,"bronze/al_avgtemp.csv",  header = 4))
-al_max_temp = pd.read_csv(os.path.join(script_dir,"bronze/al_maxtemp.csv",  header = 4))
-al_min_temp = pd.read_csv(os.path.join(script_dir,"bronze/al_mintemp.csv",  header = 4))
-al_precipitation = pd.read_csv(os.path.join(script_dir,"bronze/al_precipitation.csv",  header = 4))
-avg_temp = pd.read_csv(os.path.join(script_dir,"bronze/avg_temp.csv",  header = 4))
-fbc = pd.read_excel(os.path.join(script_dir,"bronze/fbc_data_2025.xlsx", sheet_name="County", header = 1))
-max_temp = pd.read_csv(os.path.join(script_dir,"bronze/max_temp.csv",  header = 4))
-min_temp = pd.read_csv(os.path.join(script_dir,"bronze/min_temp.csv",  header = 4))
-precipitation = pd.read_csv(os.path.join(script_dir,"bronze/precipitation.csv",  header = 4))
+al_avg_temp = pd.read_csv(os.path.join(script_dir,"bronze/al_avgtemp.csv"),  header = 4)
+al_max_temp = pd.read_csv(os.path.join(script_dir,"bronze/al_maxtemp.csv"),  header = 4)
+al_min_temp = pd.read_csv(os.path.join(script_dir,"bronze/al_mintemp.csv"),  header = 4)
+al_precipitation = pd.read_csv(os.path.join(script_dir,"bronze/al_precipitation.csv"),  header = 4)
+avg_temp = pd.read_csv(os.path.join(script_dir,"bronze/avg_temp.csv"),  header = 4)
+fbc = pd.read_excel(os.path.join(script_dir,"bronze/fbc_data_2025.xlsx"), sheet_name="County", header = 1)
+max_temp = pd.read_csv(os.path.join(script_dir,"bronze/max_temp.csv"),  header = 4)
+min_temp = pd.read_csv(os.path.join(script_dir,"bronze/min_temp.csv"),  header = 4)
+precipitation = pd.read_csv(os.path.join(script_dir,"bronze/precipitation.csv"),  header = 4)
 unemployment_data = pd.read_excel(os.path.join(script_dir,"bronze/unemployment_rate_usa.xlsx"))
 crime = pd.read_csv(os.path.join(script_dir,"bronze/crime_data_w_population_and_crime_rate.csv"))
-county_market = pd.read_csv(os.path.join(script_dir,"bronze/county_market_tracker.tsv000", sep='\t', low_memory=True))
+county_market = pd.read_csv(os.path.join(script_dir,"bronze/county_market_tracker.tsv000"), sep='\t', low_memory=True)
 fipscode = pd.read_excel(os.path.join(script_dir,"bronze/fipscode.xlsx"))
 
 # FIPSCODE
@@ -270,5 +270,5 @@ merged = merged.drop_duplicates()
 merged = merged[merged['STATE'].isin(state_names)]
 
 # EXPORT TO EXCEL
-merged.to_excel(os.path.join(script_dir,"silver/gabe_data.xlsx"), index=False)
+merged.to_excel(os.path.join(script_dir,"silver/merged_data.xlsx"), index=False)
 cost_of_living_data.to_excel(os.path.join(script_dir,"silver/cost_of_living_data.xlsx"), index=False)
