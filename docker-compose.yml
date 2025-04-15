@@ -9,4 +9,9 @@ services:
       - ./data:/app/data  # Mount data directory for live updates
     environment:
       - PYTHONUNBUFFERED=1
+    # Comment this line for running the container interactively 
     command: python data/api.py
+
+    # Uncomment the following lines if you want to run the container interactively
+    # tty: true
+    # stdin_open: true
