@@ -2,7 +2,6 @@ pandas
 numpy
 matplotlib
 scikit-learn
-jupyter
 flask
 openpyxl
 requests
