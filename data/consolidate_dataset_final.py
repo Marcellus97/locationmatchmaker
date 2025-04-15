@@ -211,7 +211,7 @@ for i in range(len(dfs)):
         df.loc[:, 'STATEABBRV'] = df['STATEABBRV'].str.upper()
 
 # STANDARDIZE - Keep only name of the county
-remove_terms = ['parish', 'borough', 'city', '/city', 'and', 'census area', '/town', 'planning region', 'municipality', "/"]
+remove_terms = ['parish', 'borough', 'city', '/city', 'and', 'census area', '/town', "/TOWN", 'planning region', 'municipality', "/"]
 
 # Regular expression pattern to match any of those terms 
 pattern = re.compile(r'\b(?:' + '|'.join(remove_terms) + r')\b', re.IGNORECASE)
@@ -265,6 +265,34 @@ merged = pd.merge(merged, crime, on=["STATE","STATEABBRV", "COUNTY"], how="outer
 merged['COUNTY_Name'] = merged['COUNTY_Name'].fillna(merged['COUNTY_Name_right'])
 merged.drop(columns=['COUNTY_Name_right'], inplace=True)
 merged['COUNTY_Name'] = merged['COUNTY_Name'].str.upper()
+
+# Combine elemen-wise when State is DC
+DC_rows = merged[merged['STATE'] == 'DISTRICT OF COLUMBIA']
+row1 = DC_rows.iloc[0].tolist()
+row2 = DC_rows.iloc[1].tolist()
+combined = [a if not pd.isna(a) else b for a, b in zip(row1, row2)]
+merged.loc[(merged['STATE'] == 'DISTRICT OF COLUMBIA') & (merged['COUNTY'] == 'DISTRICTOFCOLUMBIA')] = combined
+merged = merged[~((merged['STATE'] == 'DISTRICT OF COLUMBIA') & (merged['COUNTY'] == 'WASHINGTON'))].reset_index(drop=True)
+
+# Ensure County is DONA ANA
+merged.loc[merged['COUNTY'] == 'DOAANA', 'COUNTY'] = 'DONAANA'
+merged.loc[merged['COUNTY'] == 'DONAANA', 'COUNTY_Name'] = 'DONA ANA'
+
+# Fill in fipscode where its blank
+fips_lookup_df = pd.DataFrame({
+    'STATEABBRV': ['AK', 'AR', 'DC', 'HI', 'ID', 'IA', 'MA', 'NM', 'NY', 'OK','UT'],
+    'COUNTY': ['WRANGELL', 'ARKANSAS', 'DISTRICTOFCOLUMBIA', 'HAWAII', 'IDAHO',	'IOWA',	'NANTUCKETTOWN', 'DONAANA', 'NEWYORK', 'OKLAHOMA', 'UTAH'],
+    'fipscode': ['02280', '05000', '11001', '15000', '16000', '19000', '25019', '35013', '36000', '40000', '49000']
+})
+merged = merged.merge(
+    fips_lookup_df[['STATEABBRV', 'COUNTY', 'fipscode']],
+    on=['STATEABBRV', 'COUNTY'],
+    how='left',
+    suffixes=('', '_ref')
+)
+
+merged['fipscode'] = merged['fipscode'].fillna(merged['fipscode_ref'])
+merged = merged.drop(columns=['fipscode_ref'])
 
 merged = merged.drop_duplicates()
 merged = merged[merged['STATE'].isin(state_names)]
