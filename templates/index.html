@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sliders Page</title>
+
+    <!-- Bootstrap CSS  -->
+    <link
+      rel="stylesheet"
+      href="/static/css/bootstrap.min.css"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css" />
+
+  </head>
+  <body>
+    <div class="left-section">
+      <div class="slider-container">
+        <label for="walkability">Walkability</label>
+        <input
+          type="range"
+          id="walkability"
+          name="walkability"
+          min="0"
+          max="10"
+          step="1"
+          oninput="updateValue('walkability')"
+        />
+        <div class="value-display" id="walkability-value">5</div>
+      </div>
+
+      <!-- Repeat your other sliders here (density, warm-weather, etc.) -->
+      <!-- ... -->
+
+    </div>
+    <div class="right-section">
+      <h1>Welcome</h1>
+      <p>
+        This is the right section of the page. You can use the sliders on
+        the left to adjust your preferences.
+      </p>
+      <svg id="choropleth" width="1200" height="800"></svg>
+    </div>
+
+    <!-- Bootstrap JS (optional) -->
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+
+    <!-- D3 and other libraries from node_modules -->
+    <script src="/static/d3/d3.v5.min.js"></script>
+    <script src="/static/d3/topojson.v2.min.js"></script>
+    <script src="/static/d3/d3-geo-projection.v2.min.js"></script>
+    <script src="/static/d3/d3-legend.min.js"></script>
+    <script src="/static/d3/d3-tip.min.js"></script>
+    <script src="/static/d3/d3-dsv.min.js"></script>
+    <!-- Main JS (your custom logic) -->
+    <script src="/static/js/main.js"></script>
+  </body>
+</html>
