@@ -293,14 +293,14 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
 
     # Find the county that ranked no.1
-    county_list = df[df['rank'] == 1][['STATE','COUNTY', 'rank']].reset_index(drop=True)
+    county_list = df[df['rank'] <= 10][['STATE','COUNTY', 'rank']].sort_values(by='rank').reset_index(drop=True)
     
     #Display the county/counties
     return county_list
 
 # Example
 user_input = {
-    'state':'NEW JERSEY',
+    'state':'',
     'num_adults': '',
     'num_children': '',
     'RISK_VALUE':'',
@@ -314,7 +314,7 @@ user_input = {
     'Monthly_Childcare':'',
     'Monthly_Food':'1000', 
     'Monthly_Healthcare':'',
-    'Monthly_Housing':'',
+    'Monthly_Housing':'2000',
     'Monthly_Other Necessities ' :'',
     'Monthly_Taxes':'',
     'Monthly_Total':'',
@@ -345,6 +345,6 @@ user_input = {
 }
 
 
-# result_within_state = compute_ranking(merged_data, cost_of_living_data, user_input)
+# result_within_state = compute_ranking(static_merged_data, cost_of_living_data, user_input)
 
 # print(result_within_state)
