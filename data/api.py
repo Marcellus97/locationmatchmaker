@@ -9,8 +9,8 @@ app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 
-static_merged_data = pd.read_excel("merged_data.xlsx")
-cost_of_living_data = pd.read_excel("cost_of_living_data.xlsx")
+static_merged_data = pd.read_excel("./silver/merged_data.xlsx")
+cost_of_living_data = pd.read_excel("./silver/cost_of_living_data.xlsx")
 
 @app.route("/api/ranking", methods=["POST"])
 def get_ranking():

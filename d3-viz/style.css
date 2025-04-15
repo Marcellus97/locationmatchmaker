@@ -1,0 +1,46 @@
+/* styles.css */
+
+/* Overall body styling */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* Left slider section styling */
+  .left-section {
+    width: 300px;
+    background-color: #f0f0f0;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Right content section */
+  .right-section {
+    flex: 1;
+    background-color: #ffffff;
+    padding: 20px;
+  }
+  
+  /* Slider containers */
+  .slider-container {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  input[type="range"] {
+    width: 100%;
+  }
+  
+  .value-display {
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: #333;
+  }
+  

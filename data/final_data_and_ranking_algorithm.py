@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-cost_of_living_data = pd.read_excel("cost_of_living_data.xlsx")
-merged_data = pd.read_excel("merged_data.xlsx")
+cost_of_living_data = pd.read_excel("./silver/cost_of_living_data.xlsx")
+merged_data = pd.read_excel("./silver/merged_data.xlsx")
 
 
 def compute_ranking(static_merged_data, cost_of_living_data, user_input):
@@ -119,7 +119,7 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     # Rows with NAs for some columns
     rows_with_na = df[df.isnull().any(axis=1)].copy()
     # Exports ranked data to excel 
-    df.to_excel('final_dataset.xlsx')
+    df.to_excel('./gold/final_dataset.xlsx')
 
     # Filter by state if provided
     if 'state' in user_input:
@@ -252,7 +252,7 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     df['rank'] = df['ranking_score'].rank(ascending=False, method='dense')
    
     # Exports ranked data to excel 
-    df.to_excel('final_data_rank.xlsx')
+    df.to_excel('./gold/final_data_rank.xlsx')
 
     # Find the county that ranked no.1
     county_list = df[df['rank'] == 1][['STATE','COUNTY', 'rank']].reset_index(drop=True)

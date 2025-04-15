@@ -1,32 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>D3 Visualization</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sliders Page</title>
 
-    <!-- Bootstrap CSS (optional, for "beautiful" default styling) -->
+    <!-- Bootstrap CSS (installed via npm) -->
     <link
       rel="stylesheet"
-      href="node_modules/bootstrap/dist/css/bootstrap.min.css"
+      href="./node_modules/bootstrap/dist/css/bootstrap.min.css"
     />
 
-    <!-- Your own CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./style.css" />
   </head>
-  <body class="container">
-    <h1 class="mt-4">D3 Visualization</h1>
+  <body>
+    <div class="left-section">
+      <div class="slider-container">
+        <label for="walkability">Walkability</label>
+        <input
+          type="range"
+          id="walkability"
+          name="walkability"
+          min="0"
+          max="10"
+          step="1"
+          oninput="updateValue('walkability')"
+        />
+        <div class="value-display" id="walkability-value">5</div>
+      </div>
 
-    <!-- A container for your D3 visualization -->
-    <div id="viz"></div>
+      <!-- Repeat your other sliders here (density, warm-weather, etc.) -->
+      <!-- ... -->
 
-    <!-- D3 from node_modules -->
-    <script src="node_modules/d3/dist/d3.min.js"></script>
+    </div>
+    <div class="right-section">
+      <h1>Welcome</h1>
+      <p>
+        This is the right section of the page. You can use the sliders on
+        the left to adjust your preferences.
+      </p>
+      <svg id="choropleth" width="1200" height="800"></svg>
+    </div>
 
-    <!-- If you installed Bootstrap’s JS, you can also load it:
-    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    -->
+    <!-- Bootstrap JS (optional) -->
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Your custom JavaScript -->
-    <script src="main.js"></script>
+    <!-- D3 and other libraries from node_modules -->
+    <script src="./node_modules/d3/dist/d3.min.js"></script>
+    <script src="./node_modules/topojson-client/dist/topojson-client.min.js"></script>
+    <script src="./node_modules/d3-geo-projection/dist/d3-geo-projection.min.js"></script>
+    <script src="./node_modules/d3-legend/d3.legend.js"></script>
+    <script src="./node_modules/d3-tip/dist/index.js"></script>
+    <!-- Main JS (your custom logic) -->
+    <script src="./main.js"></script>
   </body>
 </html>

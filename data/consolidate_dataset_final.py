@@ -3,20 +3,20 @@ import openpyxl
 import re
 
 # IMPORT DATA
-nri = pd.read_csv("NRI_Table_Counties/NRI_Table_Counties.csv")
-chr = pd.read_csv("analytic_data2025.csv", low_memory=False, header = 1)
-al_avg_temp = pd.read_csv("al_avgtemp.csv",  header = 4)
-al_max_temp = pd.read_csv("al_maxtemp.csv",  header = 4)
-al_min_temp = pd.read_csv("al_mintemp.csv",  header = 4)
-al_precipitation = pd.read_csv("al_precipitation.csv",  header = 4)
-avg_temp = pd.read_csv("avg_temp.csv",  header = 4)
-fbc = pd.read_excel("fbc_data_2025.xlsx", sheet_name="County", header = 1)
-max_temp = pd.read_csv("max_temp.csv",  header = 4)
-min_temp = pd.read_csv("min_temp.csv",  header = 4)
-precipitation = pd.read_csv("precipitation.csv",  header = 4)
-unemployment_data = pd.read_excel("unemployment_rate_usa.xlsx")
-crime = pd.read_csv("crime_data_w_population_and_crime_rate.csv")
-county_market = pd.read_csv("county_market_tracker.tsv000", sep='\t')
+nri = pd.read_csv("./bronze/NRI_Table_Counties/NRI_Table_Counties.csv")
+chr = pd.read_csv("./bronze/analytic_data2025.csv", low_memory=False, header = 1)
+al_avg_temp = pd.read_csv("./bronze/al_avgtemp.csv",  header = 4)
+al_max_temp = pd.read_csv("./bronze/al_maxtemp.csv",  header = 4)
+al_min_temp = pd.read_csv("./bronze/al_mintemp.csv",  header = 4)
+al_precipitation = pd.read_csv("./bronze/al_precipitation.csv",  header = 4)
+avg_temp = pd.read_csv("./bronze/avg_temp.csv",  header = 4)
+fbc = pd.read_excel("./bronze/fbc_data_2025.xlsx", sheet_name="County", header = 1)
+max_temp = pd.read_csv("./bronze/max_temp.csv",  header = 4)
+min_temp = pd.read_csv("./bronze/min_temp.csv",  header = 4)
+precipitation = pd.read_csv("./bronze/precipitation.csv",  header = 4)
+unemployment_data = pd.read_excel("./bronze/unemployment_rate_usa.xlsx")
+crime = pd.read_csv("./bronze/crime_data_w_population_and_crime_rate.csv")
+county_market = pd.read_csv("./bronze/county_market_tracker.tsv000", sep='\t')
 
 # HAZARD DATA
 nri = nri[nri["COUNTYTYPE"] != "City"]
@@ -242,5 +242,5 @@ merged = merged.drop_duplicates()
 merged = merged[merged['STATE'].isin(state_names)]
 
 # EXPORT TO EXCEL
-merged.to_excel("merged_data.xlsx", index=False)
-cost_of_living_data.to_excel("cost_of_living_data.xlsx", index=False)
+merged.to_excel("./silver/merged_data.xlsx", index=False)
+cost_of_living_data.to_excel("./silver/cost_of_living_data.xlsx", index=False)
