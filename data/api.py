@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from flask import request, jsonify
 from final_data_and_ranking_algorithm import compute_ranking
+from consolidate_dataset_final import consolidate_data
 
 
 app = flask.Flask(__name__)
@@ -33,6 +34,21 @@ def get_ranking():
             "error": str(e),
             "traceback": traceback.format_exc()
         }), 500
+        
+@app.route("/api/consolidateData", methods=["POST"])
+def consolidate_data():
+    
+    try:
+        consolidate_data()
+        return
+        
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
 
 
 if __name__ == "__main__":

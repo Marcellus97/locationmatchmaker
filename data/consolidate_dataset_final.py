@@ -7,6 +7,7 @@ import re
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
+
 nri = pd.read_csv(os.path.join(script_dir,"bronze/NRI_Table_Counties/NRI_Table_Counties.csv"))
 chr = pd.read_csv(os.path.join(script_dir,"bronze/analytic_data2025.csv"), low_memory=False, header = 1)
 walkability = pd.read_csv(os.path.join(script_dir,"bronze/walkability.csv"))
