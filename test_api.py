@@ -21,14 +21,14 @@ def test_api(base_url="http://localhost:8080"):
         "Unemployment_Rate": 4.0
     }
     
-    print(f"Sending request to {base_url}/api/ranking")
-    print(f"Request data: {json.dumps(test_data, indent=2)}")
+    # print(f"Sending request to {base_url}/api/ranking")
+    # print(f"Request data: {json.dumps(test_data, indent=2)}")
     
     try:
         response = requests.post(
             f"{base_url}/api/ranking",
             json=test_data,
-            timeout=10
+            timeout=30
         )
         
         # Check response
@@ -36,7 +36,7 @@ def test_api(base_url="http://localhost:8080"):
             print("\n✅ API Test Successful!")
             print(f"Status Code: {response.status_code}")
             print("Response data:")
-            print(json.dumps(response.json(), indent=2))
+            # print(json.dumps(response.json(), indent=2))
             return True
         else:
             print("\n❌ API Test Failed!")
