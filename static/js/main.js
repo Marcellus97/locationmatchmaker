@@ -111,7 +111,7 @@ function getResults() {
       "Content-Type": "application/json",
     },
     // replace with userInput
-    body: JSON.stringify(test_data),
+    body: JSON.stringify(userInput),
   }).then((body) => body.json());
 
   //
@@ -123,7 +123,6 @@ function getResults() {
     counties = counties.geometries.filter((d) =>
       ranks.some((r) => r.fipscode.toString() === d.id)
     );
-    console.log(counties);
 
     updateMap(counties);
     updateList(ranks);
