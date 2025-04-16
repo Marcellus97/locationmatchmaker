@@ -298,5 +298,5 @@ merged = merged.drop_duplicates()
 merged = merged[merged['STATE'].isin(state_names)]
 
 # EXPORT TO EXCEL
-merged.to_excel(os.path.join(script_dir,"silver/merged_data.xlsx"), index=False)
-cost_of_living_data.to_excel(os.path.join(script_dir,"silver/cost_of_living_data.xlsx"), index=False)
+merged.to_excel(os.path.join(script_dir,"./static/silver/merged_data.xlsx"), index=False)
+cost_of_living_data.to_excel(os.path.join(script_dir,"./static/silver/cost_of_living_data.xlsx"), index=False)
