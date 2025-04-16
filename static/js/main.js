@@ -7,14 +7,23 @@ function updateValue(id) {
 // Set initial display values
 window.onload = function () {
   const ids = [
-    "walkability",
-    "density",
-    "warm-weather",
-    "rain",
+    // "walkability",
+    // "density",
+    // "warm-weather",
+    // "rain",
     "housing-price",
-    "job-prospects",
+    // "job-prospects",
   ];
   ids.forEach((id) => updateValue(id));
+
+  updatedDropDownHtml = "";
+  getStates().forEach((s) => {
+    let value = s == "--- ALL STATES ---" ? "" : s;
+    updatedDropDownHtml += `<option value="${value}">${s}</option>`;
+  });
+  let dropDown = document.getElementById("stateDropdown");
+  dropDown.innerHTML = updatedDropDownHtml;
+  dropDown.selectedIndex = 0;
 };
 
 /*  D3.JS MAP CODE */
@@ -23,7 +32,12 @@ var width = 1200;
 var height = 800;
 var path = d3.geoPath();
 
-  var svg = d3.select("svg");
+var svg = d3
+  .select("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("viewBox", [0, 0, width, height])
+  .attr("style", "max-width: 100%; height: auto;");
 
 var countyStatesPromise = d3.json("/static/data/counties-albers-10m.json");
 var ranksPromise = d3.csv("/static/data/gold/final_data_rank.csv");
@@ -32,76 +46,36 @@ Promise.all([countyStatesPromise, ranksPromise]).then(ready);
 
 function ready(values) {
   var countryStates = values[0];
-  var ranks = values[1];
-  console.log("ranks ", values[1]);
-  createMap(countryStates, ranks);
+  createMap(countryStates, []);
 }
 
 function createMap(countryStates, ranks) {
-  console.log(countryStates);
-  // testing this for filtering
-  // clone the object
-  // var filtered = structuredClone(countryStates);
-  // filtered.objects.counties.geometries =
-  //   filtered.objects.counties.geometries.filter(
-  //     (d) => d.properties.name == "Butler"
-  //   );
-
-  // let countyNames = countryStates.objects.counties.geometries.map(
-    // (d) =>
-      // return {
-      //   id : d[""],
-      // name : d.properties.name.toLowerCase()
-
-      // turns "Crème Brûlée" into "Creme Brulee"
-      // d.properties.name
-        // .normalize("NFKD")
-        // .replace(/[\u0300-\u036f]/g, "")
-        // .toLowerCase()
-    // }
-  // );
-  // let missing = [];
-
-  // normalize string accents
-  //https://stackoverflow.com/questions/990904/remove-accents-diacritics-in-a-string-in-javascript
-  // console.log(ranks);
-  // console.log(countyNames);
-  // ranks.forEach((r) => {
-    // let name = r["COUNTY_Name"].toLowerCase();
-    // let name2 = r["COUNTY"].toLowerCase();
-    // if (!countyNames.includes(name) && !countyNames.includes(name2)) {
-      // missing.push(r);
-    // }
-  // });
-  // console.log(missing);
-
-  svg
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto;");
+  let countyFeatures = topojson.feature(
+    countryStates,
+    countryStates.objects.counties
+  ).features;
+  let stateFeatures = topojson.feature(
+    countryStates,
+    countryStates.objects.states
+  ).features;
 
   svg
     .append("g")
     .selectAll("path")
-    .data(
-      topojson.feature(countryStates, countryStates.objects.counties).features
-    )
+    .data(countyFeatures)
     .enter()
     .append("path")
+    .attr("id", (d) => "county-" + d.id)
+    .attr("class", "county county-blank")
     .attr("d", path)
-    .attr("fill", "none")
+    .attr("fill", "white")
     .attr("stroke", "#ddd")
     .exit();
 
-
-
   svg
     .append("g")
     .selectAll("path")
-    .data(
-      topojson.feature(countryStates, countryStates.objects.states).features
-    )
+    .data(stateFeatures)
     .enter()
     .append("path")
     .attr("d", path)
@@ -111,42 +85,132 @@ function createMap(countryStates, ranks) {
 }
 
 const test_data = {
-    "state": "ohio",
-    "num_adults": 2,
-    "num_children": 0,
-    "Average Temperature F": 70,
-    "Life Expectancy": 80,
-    "Unemployment_Rate": 4.0
+  num_adults: 2,
+  num_children: 0,
+  "Average Temperature F": 70,
+  "Life Expectancy": 80,
+  Unemployment_Rate: 4.0,
+};
+
+function getUserInput() {
+  // clone
+  let input = { ...test_data };
+
+  input.state = document.getElementById("stateDropdown").value;
+
+  return input;
 }
 
 function getResults() {
-  console.log('getting results');
+  let userInput = getUserInput();
+  console.log("getting results");
 
-  fetch("http://localhost:8080/api/ranking", {
-  method: "POST",
-      headers: {
-    "Content-Type": "application/json",
-  },
+  const apiPromise = fetch("http://localhost:8080/api/ranking", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    // replace with userInput
     body: JSON.stringify(test_data),
-  }).then(body => body.json())
-  .then(data => {
-    let counties = data.results;
+  }).then((body) => body.json());
 
-    svg
-      .append("g")
-      .selectAll("path")
-      .data(topojson.feature(counties, filtered.objects.counties).features)
-      .enter()
-      .append("path")
-      .attr("d", path)
-      .attr("fill", "#afa")
-      .attr("stroke", "black")
-      .exit();
+  //
+  Promise.all([countyStatesPromise, apiPromise]).then((values) => {
+    let counties = values[0].objects.counties;
+    let ranks = values[1].results;
 
+    // filter counties
+    counties = counties.geometries.filter((d) =>
+      ranks.some((r) => r.fipscode.toString() === d.id)
+    );
+    console.log(counties);
+
+    updateMap(counties);
+    updateList(ranks);
   });
-
 }
 
-function filterCounties(input) {
-  return
+function updateMap(counties) {
+  resetMapCounties();
+  highlightMapCounties(counties);
+}
+
+function highlightMapCounties(counties) {
+  let idArray = counties.map((c) => "#county-" + c.id);
+  document.querySelectorAll(idArray).forEach((countySvg) => {
+    countySvg.setAttribute("class", "county county-highlighted");
+    countySvg.setAttribute("fill", "green");
+  });
+}
+
+function resetMapCounties() {
+  document.querySelectorAll(".county-highlighted").forEach((countySvg) => {
+    countySvg.setAttribute("class", "county county-blank");
+    countySvg.setAttribute("fill", "white");
+  });
+}
+
+function updateList(ranks) {
+  let updatedHtml = "";
+  ranks.forEach((r) => {
+    updatedHtml += `<li class="top10Item">${r.rank} - ${r.COUNTY} - ${r.STATE}</li>`;
+  });
+  document.querySelector("#top10List").innerHTML = updatedHtml;
+}
+
+function getStates() {
+  return [
+    "--- ALL STATES ---",
+    "ALABAMA",
+    "ALASKA",
+    "ARIZONA",
+    "ARKANSAS",
+    "CALIFORNIA",
+    "COLORADO",
+    "CONNECTICUT",
+    "DISTRICT OF COLUMBIA",
+    "DELAWARE",
+    "FLORIDA",
+    "GEORGIA",
+    "HAWAII",
+    "IDAHO",
+    "ILLINOIS",
+    "INDIANA",
+    "IOWA",
+    "KANSAS",
+    "KENTUCKY",
+    "LOUISIANA",
+    "MAINE",
+    "MARYLAND",
+    "MASSACHUSETTS",
+    "MICHIGAN",
+    "MINNESOTA",
+    "MISSISSIPPI",
+    "MISSOURI",
+    "MONTANA",
+    "NEBRASKA",
+    "NEVADA",
+    "NEW HAMPSHIRE",
+    "NEW JERSEY",
+    "NEW MEXICO",
+    "NEW YORK",
+    "NORTH CAROLINA",
+    "NORTH DAKOTA",
+    "OHIO",
+    "OKLAHOMA",
+    "OREGON",
+    "PENNSYLVANIA",
+    "RHODE ISLAND",
+    "SOUTH CAROLINA",
+    "SOUTH DAKOTA",
+    "TENNESSEE",
+    "TEXAS",
+    "UTAH",
+    "VERMONT",
+    "VIRGINIA",
+    "WASHINGTON",
+    "WEST VIRGINIA",
+    "WISCONSIN",
+    "WYOMING",
+  ];
 }

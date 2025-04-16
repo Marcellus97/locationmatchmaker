@@ -157,7 +157,7 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     # Exports ranked data to excel 
 
     # Comment this out for real use
-    df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
+    # df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
 
     # Filter by state if provided
     state = user_input.get('state', '').strip()
@@ -290,14 +290,14 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     df['rank'] = df['ranking_score'].rank(ascending=False, method='dense')
    
     # Exports ranked data to excel 
-    df.to_excel('./gold/final_data_rank.xlsx')
+    # df.to_excel('./gold/final_data_rank.xlsx')
     # print()
 
     # Comment this out for real use
-    df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
+    # df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
 
     # Find the county that ranked no.1
-    county_list = df[df['rank'] <= 10][['STATE','COUNTY', 'rank']].sort_values(by='rank').reset_index(drop=True)
+    county_list = df[df['rank'] <= 10][['fipscode' ,'STATE','COUNTY', 'rank']].sort_values(by='rank').reset_index(drop=True)
     
     #Display the county/counties
     return county_list

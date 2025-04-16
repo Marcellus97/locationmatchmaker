@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sliders Page</title>
+    <title>Location MatchMaker</title>
 
     <!-- Bootstrap CSS  -->
     <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
@@ -19,8 +19,8 @@
     <script src="/static/d3/d3-legend.min.js"></script>
     <script src="/static/d3/d3-tip.min.js"></script>
     <script src="/static/d3/d3-dsv.min.js"></script>
-    <!-- Main JS (your custom logic) -->
-    <script src="/static/js/main.js"></script>
+    <!-- Main JS. Need to defer so lib files can load in first -->
+    <script src="/static/js/main.js" defer></script>
   </head>
   <body>
     <div class="left-section">
@@ -124,10 +124,11 @@
           name="housing-price"
           min="0"
           max="1000000"
-          step="1"
+          step="100"
+          value="500000"
           oninput="updateValue('housing-price')"
         />
-        <div class="value-display" id="housing-price-value">5</div>
+        <div class="value-display" id="housing-price-value">500000</div>
       </div>
 
         <!-- <div>
@@ -201,6 +202,11 @@
         <div class="value-display" id="job-prospects-value">5</div>
       </div> -->
 
+      <label>
+        Select a state
+        <select id="stateDropdown"> <!-- --> </select>
+      </label>
+
       <button onclick="getResults()">Get results</button>
     </div>
     <div class="right-section">
@@ -210,6 +216,14 @@
         left to adjust your preferences.
       </p>
       <svg id="choropleth" ></svg>
+
+      <div id="top10">
+        <h2>Top 10</h2>
+        <ul id="top10List">
+          <!-- -->
+        </ul>
+      </div>
+
     </div>
   </body>
 </html>
