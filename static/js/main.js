@@ -12,6 +12,7 @@ window.onload = function () {
     // "warm-weather",
     // "rain",
     "housing-price",
+    "housing-preference",
     // "job-prospects",
   ];
   ids.forEach((id) => updateValue(id));
@@ -40,9 +41,9 @@ var svg = d3
   .attr("style", "max-width: 100%; height: auto;");
 
 var countyStatesPromise = d3.json("/static/data/counties-albers-10m.json");
-var ranksPromise = d3.csv("/static/data/gold/final_data_rank.csv");
+// var ranksPromise = d3.csv("/static/data/gold/final_data_rank.csv");
 
-Promise.all([countyStatesPromise, ranksPromise]).then(ready);
+Promise.all([countyStatesPromise]).then(ready);
 
 function ready(values) {
   var countryStates = values[0];
@@ -97,6 +98,8 @@ function getUserInput() {
   let input = { ...test_data };
 
   input.state = document.getElementById("stateDropdown").value;
+  input["median_sale_price"] = document.getElementById("housing-price").value;
+  // input["housingPreference"] = document.getElementById("housing-preference").value;
 
   return input;
 }
