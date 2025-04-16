@@ -6,12 +6,12 @@ services:
     ports:
       - "8080:8080"  # Expose the web app port
     volumes:
-      - ./data:/app/data  # Mount data directory for live updates
+      - .:/app # Mount data directory for live updates
     environment:
       - PYTHONUNBUFFERED=1
     # Comment this line for running the container interactively 
-    # command: python data/api.py
+    command: python api.py
 
     # Uncomment the following lines if you want to run the container interactively
-    tty: true
-    stdin_open: true
+    # tty: true
+    # stdin_open: true
