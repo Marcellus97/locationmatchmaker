@@ -155,6 +155,8 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     
     print(min_max)
     # Exports ranked data to excel 
+
+    # Comment this out for real use
     df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
 
     # Filter by state if provided
@@ -288,8 +290,10 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     df['rank'] = df['ranking_score'].rank(ascending=False, method='dense')
    
     # Exports ranked data to excel 
-    # df.to_excel('./gold/final_data_rank.xlsx')
+    df.to_excel('./gold/final_data_rank.xlsx')
     # print()
+
+    # Comment this out for real use
     df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
 
     # Find the county that ranked no.1
@@ -344,6 +348,14 @@ user_input = {
     'crime_rate_per_100000':''
 }
 
+
+# user_input = {
+#     'state' :'ohio',
+#     'median_sale_price' : 500000,
+#     'median_sale_price_weight' : 0.8,
+#     'unemployment_rate' : 0.04,
+#     'unemployment_rate_weight' : 0.2
+# }
 
 # result_within_state = compute_ranking(static_merged_data, cost_of_living_data, user_input)
 

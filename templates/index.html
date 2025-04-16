@@ -25,19 +25,127 @@
   <body>
     <div class="left-section">
       <div class="slider-container">
-        <label for="walkability">Walkability</label>
+        <!-- <label for="walkability">Walkability</label> -->
+
+        <!-- <div class="form-check-inline">
+          <div>(0-100k)</div>
+          <label class="form-check-label">
+            <input
+              class="form-check-input"
+              type="radio"
+              id="housing-under-100"
+            />
+          </label>
+        </div> -->
+        <!-- Housing Price Options -->
+        <div class="form-check form-check-inline">
+          <label class="form-check-label" for="housing-under-100">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="housing-price"
+              id="housing-under-100"
+              value="0-100k"
+            />
+            (0–100k)
+          </label>
+        </div>
+
+        <div class="form-check form-check-inline">
+          <label class="form-check-label" for="housing-100-300">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="housing-price"
+              id="housing-100-300"
+              value="100k-300k"
+            />
+            (100k–300k)
+          </label>
+        </div>
+
+        <div class="form-check form-check-inline">
+          <label class="form-check-label" for="housing-300-500">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="housing-price"
+              id="housing-300-500"
+              value="300k-500k"
+            />
+            (300k–500k)
+          </label>
+        </div>
+
+        <div class="form-check form-check-inline">
+          <label class="form-check-label" for="housing-500-750">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="housing-price"
+              id="housing-500-750"
+              value="500k-750k"
+            />
+            (500k–750k)
+          </label>
+        </div>
+
+        <div class="form-check form-check-inline">
+          <label class="form-check-label" for="housing-750-1m">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="housing-price"
+              id="housing-750-1m"
+              value="750k-1M"
+            />
+            (750k–1M)
+          </label>
+        </div>
+
+        <div class="form-check form-check-inline">
+          <label class="form-check-label" for="housing-over-1m">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="housing-price"
+              id="housing-over-1m"
+              value="1M+"
+            />
+            (1M+)
+          </label>
+        </div>
+
+      <div class="slider-container">
+        <label for="housing-price">Housing Price</label>
         <input
           type="range"
-          id="walkability"
-          name="walkability"
+          id="housing-price"
+          name="housing-price"
           min="0"
-          max="10"
+          max="1000000"
           step="1"
-          oninput="updateValue('walkability')"
+          oninput="updateValue('housing-price')"
         />
-        <div class="value-display" id="walkability-value">5</div>
+        <div class="value-display" id="housing-price-value">5</div>
       </div>
-      <div class="slider-container">
+
+        <!-- <div>
+          <div>Preference</div>
+          <input
+            type="range"
+            id="walkability"
+            name="walkability"
+            min="0"
+            max="10"
+            step="1"
+            oninput="updateValue('walkability')"
+          />
+          <div class="value-display" id="walkability-value">5</div>
+        </div> -->
+      </div>
+
+      <!-- <div class="slider-container">
         <label for="density">Density</label>
         <input
           type="range"
@@ -76,19 +184,9 @@
         />
         <div class="value-display" id="rain-value">5</div>
       </div>
-      <div class="slider-container">
-        <label for="housing-price">Housing Price</label>
-        <input
-          type="range"
-          id="housing-price"
-          name="housing-price"
-          min="0"
-          max="10"
-          step="1"
-          oninput="updateValue('housing-price')"
-        />
-        <div class="value-display" id="housing-price-value">5</div>
-      </div>
+
+
+
       <div class="slider-container">
         <label for="job-prospects">Job Prospects</label>
         <input
@@ -101,7 +199,9 @@
           oninput="updateValue('job-prospects')"
         />
         <div class="value-display" id="job-prospects-value">5</div>
-      </div>
+      </div> -->
+
+      <button onclick="getResults()">Get results</button>
     </div>
     <div class="right-section">
       <h1>Welcome</h1>
@@ -109,7 +209,7 @@
         This is the right section of the page. You can use the sliders on the
         left to adjust your preferences.
       </p>
-      <svg id="choropleth" width="1200" height="800"></svg>
+      <svg id="choropleth" ></svg>
     </div>
   </body>
 </html>

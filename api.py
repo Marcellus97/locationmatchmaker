@@ -34,6 +34,7 @@ def get_ranking():
         result = compute_ranking(static_merged_data, cost_of_living_data, user_input)
         
         result_json = result.to_dict(orient='records')
+        # print('printing result...', result_json)
         return jsonify({"results": result_json})
         
     except Exception as e:
