@@ -25,28 +25,31 @@
   </head>
   <body>
     <div class="left-section">
-      <div class="slider-container">
-        <div class="fw-bold fs-5 mb-2">Housing</div>
-        <label class="d-inline" for="housing-price"
-          >Price
-          <input
-            class="d-inline"
-            type="range"
-            id="housing-price"
-            name="housing-price"
-            min="0"
-            max="1000000"
-            step="1000"
-            value="500000"
-            oninput="updateValue('housing-price')"
-          />
-        </label>
-        <span class="value-display" id="housing-price-value">500000</span>
+      <div id="featuresContainer">
+        <div class="slider-container">
+          <div class="fw-bold fs-5 mb-2">Housing</div>
+          <label class="d-inline" for="housing-price"
+            >Price
+            <input
+              class="d-inline"
+              type="range"
+              id="housing-price"
+              name="housing-price"
+              min="0"
+              max="1000000"
+              step="1000"
+              value="500000"
+              oninput="updateValue('housing-price')"
+            />
+          </label>
+          <span class="value-display" id="housing-price-value">500000</span>
+        </div>
       </div>
 
       <div class="slider-container">
         <label for="housing-preference">Preference</label>
-        <input class="d-inline"
+        <input
+          class="d-inline"
           type="range"
           id="housing-preference"
           name="housing-preference"
@@ -58,7 +61,7 @@
         />
         <span class="value-display" id="housing-preference-value">5</span>
       </div>
-      <hr>
+      <hr />
 
       <label>
         Select a state
@@ -67,7 +70,7 @@
         </select>
       </label>
 
-      <button onclick="getResults()">Get results</button>
+      <button id="resultsButton">Get results</button>
     </div>
 
     <div class="right-section">

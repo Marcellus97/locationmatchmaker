@@ -1,3 +1,6 @@
+import { getStates } from "./states";
+import { addFeature, smallFeaturesArray} from "./features";
+
 function updateValue(id) {
   const slider = document.getElementById(id);
   const display = document.getElementById(id + "-value");
@@ -6,6 +9,9 @@ function updateValue(id) {
 
 // Set initial display values
 window.onload = function () {
+  // buttonEventListener
+  document.getElementById("resultsButton").addEventListener("onclick", getResults);
+
   const ids = [
     // "walkability",
     // "density",
@@ -25,6 +31,7 @@ window.onload = function () {
   let dropDown = document.getElementById("stateDropdown");
   dropDown.innerHTML = updatedDropDownHtml;
   dropDown.selectedIndex = 0;
+
 };
 
 /*  D3.JS MAP CODE */
@@ -158,61 +165,4 @@ function updateList(ranks) {
     updatedHtml += `<li class="top10Item">${r.rank} - ${r.COUNTY} - ${r.STATE}</li>`;
   });
   document.querySelector("#top10List").innerHTML = updatedHtml;
-}
-
-function getStates() {
-  return [
-    "--- ALL STATES ---",
-    "ALABAMA",
-    "ALASKA",
-    "ARIZONA",
-    "ARKANSAS",
-    "CALIFORNIA",
-    "COLORADO",
-    "CONNECTICUT",
-    "DISTRICT OF COLUMBIA",
-    "DELAWARE",
-    "FLORIDA",
-    "GEORGIA",
-    "HAWAII",
-    "IDAHO",
-    "ILLINOIS",
-    "INDIANA",
-    "IOWA",
-    "KANSAS",
-    "KENTUCKY",
-    "LOUISIANA",
-    "MAINE",
-    "MARYLAND",
-    "MASSACHUSETTS",
-    "MICHIGAN",
-    "MINNESOTA",
-    "MISSISSIPPI",
-    "MISSOURI",
-    "MONTANA",
-    "NEBRASKA",
-    "NEVADA",
-    "NEW HAMPSHIRE",
-    "NEW JERSEY",
-    "NEW MEXICO",
-    "NEW YORK",
-    "NORTH CAROLINA",
-    "NORTH DAKOTA",
-    "OHIO",
-    "OKLAHOMA",
-    "OREGON",
-    "PENNSYLVANIA",
-    "RHODE ISLAND",
-    "SOUTH CAROLINA",
-    "SOUTH DAKOTA",
-    "TENNESSEE",
-    "TEXAS",
-    "UTAH",
-    "VERMONT",
-    "VIRGINIA",
-    "WASHINGTON",
-    "WEST VIRGINIA",
-    "WISCONSIN",
-    "WYOMING",
-  ];
 }
