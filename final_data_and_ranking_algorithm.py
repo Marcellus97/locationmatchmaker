@@ -310,8 +310,15 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     # df.to_excel(os.path.join(script_dir, "./static/data/gold/final_data_rank.xlsx"))
 
     # Find the county that ranked no.1
-    county_list = df[df['rank'] <= 10][['fipscode','STATE','COUNTY', 'rank']].sort_values(by='rank').reset_index(drop=True)
-    
+    # county_list = df[df['rank'] <= 10][['fipscode','STATE','COUNTY', 'rank']].sort_values(by='rank').reset_index(drop=True)
+    # keep only the columns that actually exist
+    cols = ['fipscode','STATE','COUNTY','rank',
+        'median_sale_price','Monthly_Housing',
+        'Life Expectancy','RISK_SCORE','RESL_SCORE',
+        'num_adults','num_children']    
+    available_cols = [c for c in cols if c in df.columns]
+    county_list     = df[df['rank'] <= 10][available_cols]
+
     #Display the county/counties
     return county_list
 

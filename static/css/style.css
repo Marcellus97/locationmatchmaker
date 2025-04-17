@@ -2,77 +2,124 @@
 
 /* Overall body styling */
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    height: 100vh;
-  }
-  
-  /* Left slider section styling */
-  .left-section {
-    width: 35%;
-    background-color: #f0f0f0;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Right content section */
-  .right-section {
-    flex: 1;
-    background-color: #ffffff;
-    padding: 20px;
-  }
-  
-  /* Slider containers */
-  .slider-container {
-    margin-bottom: 20px;
-  }
-  
-  label {
-    font-weight: bold;
-  }
-  
-  input[type="range"] {
-    width: 50%;
-  }
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+}
 
-  /* Map Hover Zoom Related items */
-  .hover-zoom {
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    border: 2px solid #555;
-    border-radius: 5px;
-    pointer-events: none;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    display: none;
-  }
-  .zoom-content {
-      position: absolute;
-      transform-origin: 0 0;
-  }
-  .map-tooltip {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 5px 10px;
-      border-radius: 3px;
-      font-size: 12px;
-      pointer-events: none;
-      display: none;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  }
+/* Left slider section styling */
+.left-section {
+  width: 35%;
+  background-color: #f0f0f0;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
 
-  /* Highlighted list item */
-  .top10Item.highlighted {
-    background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
-    border-left: 4px solid #007bff; /* Blue border */
-    padding-left: 8px; /* Adjust padding to account for border */
-    font-weight: bold;
-    transition: background-color 0.3s ease, border-left 0.3s ease;
-  }
+/* Right content section */
+.right-section {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 20px;
+}
 
-  /* Smooth transition for county highlights */
-  .county {
-    transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
-  }
+/* Slider containers */
+.slider-container {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type="range"] {
+  width: 50%;
+}
+
+/* Map Hover Zoom Related items */
+.hover-zoom {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border: 2px solid #555;
+  border-radius: 5px;
+  pointer-events: none;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  display: none;
+}
+
+.zoom-content {
+  position: absolute;
+  transform-origin: 0 0;
+}
+
+.map-tooltip {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  pointer-events: none;
+  display: none;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Highlighted list item */
+.top10Item.highlighted {
+  background-color: rgba(0, 123, 255, 0.1);
+  /* Light blue background */
+  border-left: 4px solid #007bff;
+  /* Blue border */
+  padding-left: 8px;
+  /* Adjust padding to account for border */
+  font-weight: bold;
+  transition: background-color 0.3s ease, border-left 0.3s ease;
+}
+
+/* Smooth transition for county highlights */
+.county {
+  transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
+}
+
+.county-info-box{
+  position:absolute;          /* we position it dynamically in JS  */
+  z-index:10;                 /* above the SVG                     */
+  min-width:240px;
+  max-width:320px;
+  padding:1rem 1.25rem .75rem;
+  border-radius:.75rem;
+  background:#ffffff;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+  font-size:.9rem;
+  line-height:1.35;
+}
+
+.county-info-box h3{
+  margin:0 0 .25rem 0;
+  font-size:1.05rem;
+  font-weight:600;
+}
+
+.ci-row{
+  display:flex;
+  justify-content:space-between;
+  margin:.15rem 0;
+}
+
+.ci-label{ color:#555; font-weight:500; margin-right:.5rem; }
+.ci-value{ font-weight:600; }
+
+.ci-close{
+  position:absolute;
+  right:.6rem; top:.6rem;
+  cursor:pointer;
+  font-size:1.1rem;
+  line-height:1;
+  color:#888;
+  transition:color .2s;
+}
+.ci-close:hover{ color:#000; }
+
+
+/* keep it above the SVG */
