@@ -1,4 +1,4 @@
-data/bronze
+static/data/bronze
 *.pyc
 d3-viz/node_modules
 .vscode

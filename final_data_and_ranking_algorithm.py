@@ -11,8 +11,8 @@ cost_of_living_data = pd.read_excel(os.path.join(script_dir, "./static/data/silv
 
 def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     # MERGE - Cost of living data with rest of the data to create the final dataset
-    num_adults = int(user_input.get('num_adults') or 1)
-    num_children = int(user_input.get('num_children') or 1)
+    num_adults = int(user_input.get('num_adults') or 2)
+    num_children = int(user_input.get('num_children') or 0)
 
     family_size = f"{num_adults}p{num_children}c"
     cost_of_living_data = cost_of_living_data[cost_of_living_data['Family'] == family_size]
@@ -154,10 +154,8 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
                   'crime_rate_per_100000']].agg(['min', 'max']).transpose()
     
     print(min_max)
-    # Exports ranked data to excel 
-
     # Comment this out for real use
-    # df.to_excel(os.path.join(script_dir, "gold/final_data_rank.xlsx"))
+    # df.to_excel(os.path.join(script_dir, "./static/data/gold/final_dataset.xlsx"))
 
     # Filter by state if provided
     state = user_input.get('state', '').strip()
@@ -169,18 +167,43 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
             df = filtered_df
     # Remove these from user input as we have filtered by state and family
     # Keep only the feature that will be used to rank the county
-    excluded_keys = ['state', 'num_adults', 'num_children', 'RISK_RATNG', 'RESL_RATNG']
+    excluded_keys = ['state', 'num_adults', 'num_children', 'fipscode']
 
     cleaned_input = {
         k: v for k, v in user_input.items()
         if pd.notna(v) and v != '' and k not in excluded_keys
-    }
-    features = list(cleaned_input.keys()) 
+    }   
     
-    # RANKING LOGIC
+    # Convert categorical user inutss to numeric
+    rating_keys = ['RISK_RATNG', 'RESL_RATNG']
+    for key in rating_keys:
+        try:
+            val = str(user_input[key]).strip()
+            user_input[key] = rating_order[val]
+        except (KeyError, ValueError):
+            pass 
+    
+    # Seperate the user input data to values and weights
+    features = []
+    values = {}
+    weights = {}
+    for key in cleaned_input:
+            if 'weight' not in key:
+                feature = key
+                weight_key = f"{feature}_weight"
+                val = user_input.get(key)
+                weight = user_input.get(weight_key)
 
-    # -1: Lower the better
-    # 1: Higher the better
+                if val not in ['', None] and weight not in ['', None]:
+                    try:
+                        val = float(val)
+                        weight = float(weight)
+                        features.append(feature)
+                        values[feature] = val
+                        weights[feature] = weight
+                    except ValueError:
+                        continue             
+    
     direction = {
         'RISK_VALUE':-1,
         'RISK_SCORE':-1,
@@ -221,9 +244,12 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
         'crime_rate_per_100000':-1
     }
 
-    if features:
-    # Drop rows if any of the features are 0    
+
+    # RANKING LOGIC
+    if features:      
+    # Drop rows if any of the features have a value of 0    
         df = df.copy()
+        print(df)
         required_features = ['Life Expectancy', 'Homeownership', 'POPULATION', 'Average Temperature F', 'Maximum Temperature F',
                              'Minimum Temperature F', 'median_sale_price', 'median_list_price', 'median_ppsf', 'Monthly_Housing',
                              'Monthly_Food', 'Monthly_Transportation', 'Monthly_Healthcare', 'Monthly_Other Necessities ', 
@@ -232,120 +258,146 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     # Normalize numeric features
         scaler = MinMaxScaler()
         df[features] = scaler.fit_transform(df[features])
+        print(df[features].head())
         user_input_normalized = {}
         for i, col in enumerate(features):
             col_min = scaler.data_min_[i]
             col_max = scaler.data_max_[i]
-            user_val = user_input[col]
+            user_val = values[col]
             user_val = float(user_val)
             user_input_normalized[col] = (user_val - col_min) / (col_max - col_min)
-
-        # Compute directional similarity scores
+        
+        # Compute similarity scores
         for col in features:
             score = 1 - abs(df[col] - user_input_normalized[col])
-            if direction.get(col, 1) == -1:
-                score = 1 - score  # reverse if lower is better
             df[col + '_score'] = score
 
-        # Weight by variance
-        score_cols = [f + '_score' for f in features]
-        variances = df[score_cols].var()
-        total_var = variances.sum()
-        weights = {col: variances[col + '_score'] / total_var for col in features}
+        # Compute ranking score
         df['ranking_score'] = sum(df[col + '_score'] * weights[col] for col in features)
+    
     else:
         # Fallback to equal weight on all numeric columns (with direction)
-        numeric_cols = df.select_dtypes(include=[np.number]).columns
-        excluded = ['rank', 'ranking_score']
-        fallback_features = [col for col in numeric_cols if col not in excluded]
+        fallback_features = [col for col in df.select_dtypes(include=[np.number]).columns if col not in excluded_keys]
 
+        # Normalize the numeric features
         scaler = MinMaxScaler()
         df[fallback_features] = scaler.fit_transform(df[fallback_features])
-
+        
         for col in fallback_features:
             if direction.get(col, 1) == -1:
                 df[col] = 1 - df[col]
+        
+        # Assign equal weights
+        equal_weight = 1 / len(fallback_features)
+        weights = {col: equal_weight for col in fallback_features}
 
-        variances = df[fallback_features].var()
-        total_var = variances.sum()
-        weights = {col: variances[col] / total_var for col in fallback_features}
+        def calculate_rank_score(row):
+            values = []
+            wts = []
+            for col in fallback_features:
+                if pd.notna(row[col]):
+                    values.append(row[col] * weights[col])
+                    wts.append(weights[col])
+            return sum(values) / sum(wts) if wts else np.nan
+        
+        # Compute ranking score
+        df['ranking_score'] = df.apply(calculate_rank_score, axis=1)
 
-        df['ranking_score'] = sum(df[col] * weights[col] for col in fallback_features)
-
-    # Step 4: Add categorical scoring
-    user_ratings = {
-        k: v for k, v in user_input.items() if k in ['RISK_RATNG', 'RESL_RATNG']}
-    
-    for col, user_pref in user_ratings.items():
-        if col in df.columns:
-            user_val = rating_order.get(user_pref.upper(), 3)
-            df[col + '_score'] = df[col].map(lambda x: 1 - abs(rating_order.get(str(x).upper(), 3) - user_val) / 4)
-
-    # Step 5: Combine all scores
-    cat_score_cols = [col + '_score' for col in user_ratings if col in df.columns]
-    base_score_cols = [f + '_score' for f in features] if features else fallback_features
-    all_score_cols = [col for col in base_score_cols if col in df.columns] + cat_score_cols
-
-    df['ranking_score'] = df[all_score_cols].mean(axis=1)
     df['rank'] = df['ranking_score'].rank(ascending=False, method='dense')
    
-    # Exports ranked data to excel 
-    df.to_excel('./static/data/gold/final_data_rank.xlsx')
-    # print()
-
+    # Exports ranked data to excel     
     # Comment this out for real use
-    df.to_excel(os.path.join(script_dir, "./static/data/gold/final_data_rank.xlsx"))
+    # df.to_excel(os.path.join(script_dir, "./static/data/gold/final_data_rank.xlsx"))
 
     # Find the county that ranked no.1
-    county_list = df[df['rank'] <= 10][['fipscode' ,'STATE','COUNTY', 'rank']].sort_values(by='rank').reset_index(drop=True)
+    county_list = df[df['rank'] <= 10][['fipscode','STATE','COUNTY', 'rank']].sort_values(by='rank').reset_index(drop=True)
     
     #Display the county/counties
     return county_list
 
 # Example
 user_input = {
-    'state':'',
+    'state':'VIRGINIA',
     'num_adults': '',
     'num_children': '',
     'RISK_VALUE':'',
+    'RISK_VALUE_weight':'',
     'RISK_SCORE':'',
+    'RISK_SCORE_weight':'',
     'RISK_SPCTL':'',
+    'RISK_SPCTL_weight':'',
     'RISK_RATNG':'',
+    'RISK_RATNG_weight':'',
     'RESL_VALUE':'',
+    'RESL_VALUE_weight':'',
     'RESL_SCORE':'',
+    'RESL_SCORE_weight':'',
     'RESL_SPCTL':'',
+    'RESL_SPCTL_weight':'',
     'RESL_RATNG':'',
+    'RESL_RATNG_weight':'',
     'Monthly_Childcare':'',
-    'Monthly_Food':'1000', 
+    'Monthly_Childcare_weight':'',
+    'Monthly_Food':'',
+    'Monthly_Food_weight':'', 
     'Monthly_Healthcare':'',
-    'Monthly_Housing':'2000',
+    'Monthly_Healthcare_weight':'',
+    'Monthly_Housing':'',
+    'Monthly_Housing_weight':'',
     'Monthly_Other Necessities ' :'',
+    'Monthly_Other Necessities _weight' :'',
     'Monthly_Taxes':'',
+    'Monthly_Taxes_weight':'',
     'Monthly_Total':'',
-    'Monthly_Transportation':'', 
+    'Monthly_Total_weight':'',
+    'Monthly_Transportation':'',
+    'Monthly_Transportation_weight':'', 
     'Access to Exercise Opportunities':'',
+    'Access to Exercise Opportunities_weight':'',
     'Food Environment Index':'',
+    'Food Environment Index_weight':'',
     'Primary Care Physicians':'',
+    'Primary Care Physicians_weight':'',
     'Air Pollution: Particulate Matter':'',
+    'Air Pollution: Particulate Matter_weight':'',
     'Broadband Access':'',
+    'Broadband Access_weight':'',
     'Life Expectancy':'',
+    'Life Expectancy_weight':'',
     'Traffic Volume':'',
+    'Traffic Volume_weight':'',
     'Homeownership':'',
+    'Homeownership_weight':'',
     'Access to Parks':'',
+    'Access to Parks_weight':'',
     'Average Temperature F':'',
+    'Average Temperature F_weight':'',
     'Maximum Temperature F':'',
+    'Maximum Temperature F_weight':'',
     'Minimum Temperature F':'',
+    'Minimum Temperature F_weight':'',
     'Precipitation_inches':'',
-    'median_sale_price':'300000',
+    'Precipitation_inches_weight':'',
+    'median_sale_price':'',
+    'median_sale_price_weight':'',
     'median_list_price':'',
+    'median_list_price_weight':'',
     'median_ppsf':'',
+    'median_ppsf_weight':'',
     'homes_sold':'',
+    'homes_sold_weight':'',
     'new_listings':'',
+    'new_listings_weight':'',
     'inventory':'',
+    'inventory_weight':'',
     'months_of_supply':'',
+    'months_of_supply_weight':'',
     'median_dom_months':'',
+    'median_dom_months_weight':'',
     'Unemployment_Rate':'',
-    'crime_rate_per_100000':''
+    'Unemployment_Rate_weight':'',
+    'crime_rate_per_100000':'',
+    'crime_rate_per_100000_weight':''
 }
 
 
@@ -357,6 +409,6 @@ user_input = {
 #     'unemployment_rate_weight' : 0.2
 # }
 
-# result_within_state = compute_ranking(static_merged_data, cost_of_living_data, user_input)
+result_within_state = compute_ranking(static_merged_data, cost_of_living_data, user_input)
 
-# print(result_within_state)
+print(result_within_state)
