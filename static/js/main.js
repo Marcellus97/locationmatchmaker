@@ -22,11 +22,11 @@ window.onload = function () {
 
   let featureIds = smallFeaturesArray().map((feature) => feature.id);
   let prefIds = smallFeaturesArray().map(
-    (feature) => feature.id + "-preference"
+    (feature) => feature.id + "-weight"
   );
   const ids = featureIds
     .concat(prefIds)
-    .concat(["housing-price", "housing-preference"]);
+    .concat(["housing-price", "housing-price-weight"]);
   console.log(ids);
   // const ids = [
   // "walkability",
@@ -34,7 +34,7 @@ window.onload = function () {
   // "warm-weather",
   // "rain",
   // "housing-price",
-  // "housing-preference",
+  // "housing-weight",
   // "job-prospects",
   // ];
   ids.forEach((id) => updateSliderValue(id));

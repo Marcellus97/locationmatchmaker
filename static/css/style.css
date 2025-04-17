@@ -146,7 +146,7 @@ input[type="range"] {
   overflow-y: auto;
 }
 
-county-hover {
+.county-hover {
   stroke: #007bff !important; /* Bold blue outline */
   stroke-width: 3px !important;
   fill: rgba(0, 123, 255, 0.4) !important; /* More vibrant blue fill */

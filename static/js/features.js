@@ -1,9 +1,7 @@
 export function updateSliderValue(id) {
   const slider = document.getElementById(id);
   const display = document.getElementById(id + "-value");
-  console.log(`Slider: ${slider}, Display: ${display}`);
   if (slider && display) {
-    console.log(`Updating ${id}-value to ${slider.value}`);
     display.textContent = slider.value;
   } else {
     console.error(`Element with id "${id}" or "${id}-value" not found.`);
@@ -20,9 +18,9 @@ export function feature(featureParameters) {
     value = 1,
     id,
   } = featureParameters;
-  const preferenceId = id + "-preference";
+  const weightId = id + "-weight";
   const valueId = id + "-value";
-  const preferenceValueId = preferenceId + "-value";
+  const weightValueId = weightId + "-value";
   return `
       <div class="slider-container">
         <div class="fw-bold fs-5 mb-2">${category}</div>
@@ -44,19 +42,19 @@ export function feature(featureParameters) {
       </div>
 
       <div class="slider-container">
-        <label for="${preferenceId}">Preference</label>
+        <label for="${weightId}">weight</label>
         <input
           class="d-inline"
           type="range"
-          id="${preferenceId}"
-          name="${preferenceId}"
+          id="${weightId}"
+          name="${weightId}"
           min="0"
           max="10"
           step="1"
           value="5"
-          oninput="updateSliderValue('${preferenceId}')"
+          oninput="updateSliderValue('${weightId}')"
         />
-        <span class="value-display" id="${preferenceValueId}">5</span>
+        <span class="value-display" id="${weightValueId}">5</span>
       </div>
       <hr />
     `;
@@ -80,8 +78,8 @@ export function getFeatureIds() {
   return Object.keys(smallFeatures());
 }
 
-export function getFeaturePreferenceIds() {
-  return getFeatureIds().map((key) => key + "-preference");
+export function getFeatureweightIds() {
+  return getFeatureIds().map((key) => key + "-weight");
 }
 
 export function smallFeaturesObjects() {
