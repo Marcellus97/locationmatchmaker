@@ -282,6 +282,11 @@ combined = [a if not pd.isna(a) else b for a, b in zip(row1, row2)]
 merged.loc[(merged['STATE'] == 'DISTRICT OF COLUMBIA') & (merged['COUNTY'] == 'DISTRICTOFCOLUMBIA')] = combined
 merged = merged[~((merged['STATE'] == 'DISTRICT OF COLUMBIA') & (merged['COUNTY'] == 'WASHINGTON'))].reset_index(drop=True)
 
+def elementwise_combine(group):
+    return group.ffill().bfill().iloc[0] 
+
+merged = merged.groupby('fipscode', as_index=False).apply(elementwise_combine).reset_index(drop=True)
+
 # Ensure County is DONA ANA
 merged.loc[merged['COUNTY'] == 'DOAANA', 'COUNTY'] = 'DONAANA'
 merged.loc[merged['COUNTY'] == 'DONAANA', 'COUNTY_Name'] = 'DONA ANA'
