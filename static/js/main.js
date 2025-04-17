@@ -173,6 +173,7 @@ function highlightMapCounties(counties) {
       countySvg.setAttribute("stroke", "green");
       countySvg.setAttribute("stroke-width", "2");
       countySvg.setAttribute("fill", "rgba(0, 255, 0, 0.2)"); // Light green fill
+      countySvg.classList.add("county-top10");
     }
   });
 }
@@ -195,16 +196,51 @@ function updateList(ranks) {
   attachHoverListeners(ranks);
 }
 
+function highlightCountyOnMap(countyId) {
+  // First reset any previous highlights to avoid confusion
+  document.querySelectorAll(".county-hover").forEach(county => {
+    county.classList.remove("county-hover");
+  });
+  
+  // Add hover highlight to the target county
+  const countyElement = document.querySelector(`#county-${countyId}`);
+  if (countyElement) {
+    countyElement.classList.add("county-hover");
+    
+    // Ensure this county is on top of others by appending it to its parent
+    const parent = countyElement.parentNode;
+    parent.appendChild(countyElement);
+  }
+}
+
 function highlightListItem(countyId) {
-  // Highlight the corresponding list item
-  document.querySelectorAll(".top10Item").forEach((item) => {
+  document.querySelectorAll(".top10Item").forEach(item => {
     if (item.dataset.countyId === countyId) {
       item.classList.add("highlighted");
+      
+      // Scroll the item into view if it's not already visible
+      const container = document.getElementById("top10List");
+      if (container.scrollHeight > container.clientHeight) {
+        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     } else {
       item.classList.remove("highlighted");
     }
   });
 }
+
+
+
+// function highlightListItem(countyId) {
+//   // Highlight the corresponding list item
+//   document.querySelectorAll(".top10Item").forEach((item) => {
+//     if (item.dataset.countyId === countyId) {
+//       item.classList.add("highlighted");
+//     } else {
+//       item.classList.remove("highlighted");
+//     }
+//   });
+// }
 
 function highlightCountyBorder(countyId) {
   // Highlight the corresponding county and hide others
@@ -220,45 +256,133 @@ function highlightCountyBorder(countyId) {
   });
 }
 
-function resetHighlights(top10Counties = []) {
-  /* clear all temporary highlights */
-  document.querySelectorAll(".top10Item").forEach((item) =>
-    item.classList.remove("highlighted")
-  );
+// function resetHighlights(top10Counties = []) {
+//   /* clear all temporary highlights */
+//   document.querySelectorAll(".top10Item").forEach((item) =>
+//     item.classList.remove("highlighted")
+//   );
 
-  document.querySelectorAll(".county").forEach((countySvg) => {
-    countySvg.style.display = "block";
-    countySvg.setAttribute("stroke", "#ddd");
-    countySvg.setAttribute("stroke-width", "1");
-    countySvg.setAttribute("fill", "white");
+//   document.querySelectorAll(".county").forEach((countySvg) => {
+//     countySvg.style.display = "block";
+//     countySvg.setAttribute("stroke", "#ddd");
+//     countySvg.setAttribute("stroke-width", "1");
+//     countySvg.setAttribute("fill", "white");
+//   });
+
+//   /* re‑apply the original green outlines */
+//   top10Counties.forEach((c) => {
+//     const id = c.id ?? c.fipscode;        // works for either object
+//     const countySvg = document.querySelector(`#county-${id}`);
+//     if (countySvg) {
+//       countySvg.setAttribute("stroke", "green");
+//       countySvg.setAttribute("stroke-width", "2");
+//       countySvg.setAttribute("fill", "rgba(0,255,0,0.2)");
+//     }
+//   });
+// }
+
+// Fixed function to attach hover listeners
+function attachHoverListeners(rankList, top10Geo = []) {  // Provide default empty array
+  // Clear any existing event listeners (to prevent duplicates)
+  document.querySelectorAll(".top10Item").forEach(item => {
+    item.replaceWith(item.cloneNode(true));
   });
-
-  /* re‑apply the original green outlines */
-  top10Counties.forEach((c) => {
-    const id = c.id ?? c.fipscode;        // works for either object
-    const countySvg = document.querySelector(`#county-${id}`);
-    if (countySvg) {
-      countySvg.setAttribute("stroke", "green");
-      countySvg.setAttribute("stroke-width", "2");
-      countySvg.setAttribute("fill", "rgba(0,255,0,0.2)");
+  
+  document.querySelectorAll(".county").forEach(county => {
+    const newCounty = county.cloneNode(true);
+    county.parentNode.replaceChild(newCounty, county);
+  });
+  
+  // Attach new listeners to list items
+  document.querySelectorAll(".top10Item").forEach(listItem => {
+    listItem.addEventListener("mouseenter", () => {
+      const countyId = listItem.dataset.countyId;
+      highlightListItem(countyId);
+      highlightCountyOnMap(countyId);
+    });
+    
+    listItem.addEventListener("mouseleave", () => {
+      resetHighlights(top10Geo);
+    });
+    
+    // Add click functionality to center on the county
+    listItem.addEventListener("click", () => {
+      const countyId = listItem.dataset.countyId;
+      const county = document.querySelector(`#county-${countyId}`);
+      if (county) {
+        // You could add map centering/zooming functionality here if desired
+        // For now, just make the highlight persist
+        resetHighlights(top10Geo);
+        highlightListItem(countyId);
+        highlightCountyOnMap(countyId);
+      }
+    });
+  });
+  
+  // Attach new listeners to map counties
+  document.querySelectorAll(".county").forEach(county => {
+    const countyId = county.id.replace("county-", "");
+    
+    // Check if the county is in top10Geo array (with safety checks)
+    const isTop10County = Array.isArray(top10Geo) && top10Geo.length > 0 && 
+      top10Geo.some(c => c && (c.id === countyId || c.fipscode === countyId));
+    
+    // Only add hover effects to counties in the top 10
+    if (isTop10County) {
+      county.addEventListener("mouseenter", () => {
+        highlightListItem(countyId);
+        highlightCountyOnMap(countyId);
+      });
+      
+      county.addEventListener("mouseleave", () => {
+        resetHighlights(top10Geo);
+      });
+      
+      // Make counties clickable
+      county.style.cursor = "pointer";
+      county.addEventListener("click", () => {
+        resetHighlights(top10Geo);
+        highlightListItem(countyId);
+        highlightCountyOnMap(countyId);
+      });
     }
   });
 }
 
-function attachHoverListeners(rankList, top10Geo) {
-  document.querySelectorAll(".top10Item").forEach((listItem) => {
-    listItem.addEventListener("mouseenter", () => {
-      const countyId = listItem.dataset.countyId;
-
-      // NEW – light‑blue highlight on the list itself
-      highlightListItem(countyId);
-
-      // keep the map behaviour you already had
-      highlightCountyBorder(countyId);
-    });
-
-    listItem.addEventListener("mouseleave", () => resetHighlights(top10Geo));
+// And update the resetHighlights function for safety
+function resetHighlights(top10Counties = []) {
+  // Remove hover effect from counties
+  document.querySelectorAll(".county-hover").forEach(county => {
+    county.classList.remove("county-hover");
   });
+  
+  // Remove highlight from list items
+  document.querySelectorAll(".top10Item").forEach(item => {
+    item.classList.remove("highlighted");
+  });
+  
+  // Ensure top10 counties have their default styling
+  document.querySelectorAll(".county").forEach(county => {
+    county.classList.remove("county-top10");
+    county.setAttribute("stroke", "#ddd");
+    county.setAttribute("stroke-width", "1");
+    county.setAttribute("fill", "white");
+  });
+  
+  // Re-apply the top10 styling (with safety check)
+  if (Array.isArray(top10Counties) && top10Counties.length > 0) {
+    top10Counties.forEach(c => {
+      if (c) {  // Make sure c exists
+        const id = c.id || c.fipscode;
+        if (id) {  // Make sure id exists
+          const countySvg = document.querySelector(`#county-${id}`);
+          if (countySvg) {
+            countySvg.classList.add("county-top10");
+          }
+        }
+      }
+    });
+  }
 }
 
 
