@@ -1,30 +1,40 @@
 import { getStates } from "./states.js";
-import { updateSliderValue, addFeature, smallFeaturesArray, feature, } from "./features.js";
+import {
+  updateSliderValue,
+  addFeature,
+  smallFeaturesArray,
+  feature,
+} from "./features.js";
 
 window.updateSliderValue = updateSliderValue;
 // Set initial display values
 window.onload = function () {
   // buttonEventListener
-  document.getElementById("resultsButton").addEventListener("onclick", getResults());
+  document
+    .getElementById("resultsButton")
+    .addEventListener("click", getResults);
 
   // add feature sliders
-  smallFeaturesArray().forEach(feature => {
-    addFeature(feature); 
-  })
-
+  smallFeaturesArray().forEach((feature) => {
+    addFeature(feature);
+  });
 
   let featureIds = smallFeaturesArray().map((feature) => feature.id);
-  let prefIds = smallFeaturesArray().map((feature) => feature.id + "-preference");
-  const ids = featureIds.concat(prefIds).concat(["housing-price", "housing-preference"]);
+  let prefIds = smallFeaturesArray().map(
+    (feature) => feature.id + "-preference"
+  );
+  const ids = featureIds
+    .concat(prefIds)
+    .concat(["housing-price", "housing-preference"]);
   console.log(ids);
   // const ids = [
-    // "walkability",
-    // "density",
-    // "warm-weather",
-    // "rain",
-    // "housing-price",
-    // "housing-preference",
-    // "job-prospects",
+  // "walkability",
+  // "density",
+  // "warm-weather",
+  // "rain",
+  // "housing-price",
+  // "housing-preference",
+  // "job-prospects",
   // ];
   ids.forEach((id) => updateSliderValue(id));
 
@@ -36,7 +46,6 @@ window.onload = function () {
   let dropDown = document.getElementById("stateDropdown");
   dropDown.innerHTML = updatedDropDownHtml;
   dropDown.selectedIndex = 0;
-
 };
 
 /*  D3.JS MAP CODE */
