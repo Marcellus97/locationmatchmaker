@@ -35,4 +35,31 @@ body {
   input[type="range"] {
     width: 50%;
   }
+
+  /* Map Hover Zoom Related items */
+  .hover-zoom {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 2px solid #555;
+    border-radius: 5px;
+    pointer-events: none;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    display: none;
+  }
+  .zoom-content {
+      position: absolute;
+      transform-origin: 0 0;
+  }
+  .map-tooltip {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 5px 10px;
+      border-radius: 3px;
+      font-size: 12px;
+      pointer-events: none;
+      display: none;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  }
   

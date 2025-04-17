@@ -1,31 +1,34 @@
-import { getStates } from "./states";
-import { addFeature, smallFeaturesArray, } from "./features";
+import { getStates } from "./states.js";
+import { updateSliderValue, addFeature, smallFeaturesArray, feature, } from "./features.js";
 
-function updateValue(id) {
-  const slider = document.getElementById(id);
-  const display = document.getElementById(id + "-value");
-  display.textContent = slider.value;
-}
-
+window.updateSliderValue = updateSliderValue;
 // Set initial display values
 window.onload = function () {
   // buttonEventListener
-  document.getElementById("resultsButton").addEventListener("onclick", getResults);
+  document.getElementById("resultsButton").addEventListener("onclick", getResults());
+
+  // add feature sliders
+  smallFeaturesArray().forEach(feature => {
+    addFeature(feature); 
+  })
 
 
-  smallFeaturesArray().map((feature) => feature.id = feature.id + "-preference");
-  const ids = [
+  let featureIds = smallFeaturesArray().map((feature) => feature.id);
+  let prefIds = smallFeaturesArray().map((feature) => feature.id + "-preference");
+  const ids = featureIds.concat(prefIds).concat(["housing-price", "housing-preference"]);
+  console.log(ids);
+  // const ids = [
     // "walkability",
     // "density",
     // "warm-weather",
     // "rain",
-    "housing-price",
-    "housing-preference",
+    // "housing-price",
+    // "housing-preference",
     // "job-prospects",
-  ];
-  ids.forEach((id) => updateValue(id));
+  // ];
+  ids.forEach((id) => updateSliderValue(id));
 
-  updatedDropDownHtml = "";
+  let updatedDropDownHtml = "";
   getStates().forEach((s) => {
     let value = s == "--- ALL STATES ---" ? "" : s;
     updatedDropDownHtml += `<option value="${value}">${s}</option>`;
@@ -103,6 +106,7 @@ const test_data = {
 };
 
 function getUserInput() {
+  console.log("get user input");
   // clone
   let input = { ...test_data };
 

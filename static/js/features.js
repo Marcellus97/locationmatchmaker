@@ -1,5 +1,25 @@
+export function updateSliderValue(id) {
+  const slider = document.getElementById(id);
+  const display = document.getElementById(id + "-value");
+  console.log(`Slider: ${slider}, Display: ${display}`);
+  if (slider && display) {
+    console.log(`Updating ${id}-value to ${slider.value}`);
+    display.textContent = slider.value;
+  } else {
+    console.error(`Element with id "${id}" or "${id}-value" not found.`);
+  }
+}
+
 export function feature(featureParameters) {
-  const { name, category, min, max, step, value, id } = featureParameters;
+  const {
+    name,
+    category,
+    min = 0,
+    max = 10,
+    step = 1,
+    value = 1,
+    id,
+  } = featureParameters;
   const preferenceId = id + "-preference";
   const valueId = id + "-value";
   const preferenceValueId = preferenceId + "-value";
@@ -17,7 +37,7 @@ export function feature(featureParameters) {
             max="${max}"
             step="${step}"
             value="${value}"
-            oninput="updateValue('${id}')"
+            oninput="updateSliderValue('${id}')"
           />
         </label>
         <span class="value-display" id="${valueId}">500000</span>
@@ -34,7 +54,7 @@ export function feature(featureParameters) {
           max="10"
           step="1"
           value="5"
-          oninput="updateValue('${preferenceId}')"
+          oninput="updateSliderValue('${preferenceId}')"
         />
         <span class="value-display" id="${preferenceValueId}">5</span>
       </div>
@@ -50,6 +70,10 @@ export function addFeature(featureObject) {
 
   let featureHtml = feature(featureObject);
   document.getElementById("featuresContainer").innerHTML += featureHtml;
+
+  //   document.querySelector(getFeatureIds().map(id => "#"+id).forEach(featureSlider => {
+  //     featureSlider.addEventListener("oninput", updateSliderValue);
+  //   })
 }
 
 export function getFeatureIds() {

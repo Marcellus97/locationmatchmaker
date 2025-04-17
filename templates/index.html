@@ -21,7 +21,9 @@
     <script src="/static/d3/d3-tip.min.js"></script>
     <script src="/static/d3/d3-dsv.min.js"></script>
     <!-- Main JS. Need to defer so lib files can load in first -->
-    <script src="/static/js/main.js" defer></script>
+    <script src="/static/js/features.js" defer type="module"></script>
+    <script src="/static/js/states.js" defer type="module"></script>
+    <script src="/static/js/main.js" type="module"></script>
   </head>
   <body>
     <div class="left-section">
@@ -39,29 +41,29 @@
               max="1000000"
               step="1000"
               value="500000"
-              oninput="updateValue('housing-price')"
+              oninput="updateSliderValue('housing-price')"
             />
           </label>
           <span class="value-display" id="housing-price-value">500000</span>
         </div>
-      </div>
 
-      <div class="slider-container">
-        <label for="housing-preference">Preference</label>
-        <input
-          class="d-inline"
-          type="range"
-          id="housing-preference"
-          name="housing-preference"
-          min="0"
-          max="10"
-          step="1"
-          value="5"
-          oninput="updateValue('housing-preference')"
-        />
-        <span class="value-display" id="housing-preference-value">5</span>
+        <div class="slider-container">
+          <label for="housing-preference">Preference</label>
+          <input
+            class="d-inline"
+            type="range"
+            id="housing-preference"
+            name="housing-preference"
+            min="0"
+            max="10"
+            step="1"
+            value="5"
+            oninput="updateSliderValue('housing-preference')"
+          />
+          <span class="value-display" id="housing-preference-value">5</span>
+        </div>
+        <hr />
       </div>
-      <hr />
 
       <label>
         Select a state
