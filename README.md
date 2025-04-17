@@ -108,7 +108,7 @@ Then visit http://localhost:3000.
 
 - Permission Errors (Linux/WSL)
 
-    - If you get permission denied errors, you might need to adjust file ownership with chown or temporarily use sudo (though this is rarely necessary if your permissions are correct).
+    - If you get permission denied errors, you might need to adjust the file ownership with chown or temporarily use sudo (though this is rarely necessary if your permissions are correct).
 # Location Matchmaking Platform: Complete Setup and API Guide
 
 This comprehensive guide will help you set up, deploy, and test the Location Matchmaking Platform API using Docker.
