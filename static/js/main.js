@@ -160,10 +160,14 @@ function getResults() {
   Promise.all([countyStatesPromise, apiPromise]).then((values) => {
     let counties = values[0].objects.counties;
     let ranks = values[1].results;
+    
+    ranks.forEach(r => {
+      r.fipscode = String(r.fipscode);
+    });
 
-    // Filter counties
+    // Make sure we're filtering with string comparison
     counties = counties.geometries.filter((d) =>
-      ranks.some((r) => r.fipscode.toString() === d.id)
+      ranks.some((r) => String(r.fipscode) === String(d.id))
     );
 
     currentTop10Geo = counties; // geometry
