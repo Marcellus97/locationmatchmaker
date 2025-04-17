@@ -219,7 +219,7 @@ def drop_city_rows(df):
     return df 
 df = drop_city_rows(df) 
 
-remove_terms = ['parish', 'borough', 'and', 'census area', '/town', "/TOWN", 'planning region', 'municipality', "/", "park", "city"]
+remove_terms = ['parish', 'borough', 'and', 'census area', '/town', "/TOWN", 'planning region', 'municipality', "/", "city"]
 
 # Regular expression pattern to match any of those terms 
 pattern = re.compile(r'\b(?:' + '|'.join(remove_terms) + r')\b', re.IGNORECASE)
@@ -282,11 +282,6 @@ combined = [a if not pd.isna(a) else b for a, b in zip(row1, row2)]
 merged.loc[(merged['STATE'] == 'DISTRICT OF COLUMBIA') & (merged['COUNTY'] == 'DISTRICTOFCOLUMBIA')] = combined
 merged = merged[~((merged['STATE'] == 'DISTRICT OF COLUMBIA') & (merged['COUNTY'] == 'WASHINGTON'))].reset_index(drop=True)
 
-def elementwise_combine(group):
-    return group.ffill().bfill().iloc[0] 
-
-merged = merged.groupby('fipscode', as_index=False).apply(elementwise_combine).reset_index(drop=True)
-
 # Ensure County is DONA ANA
 merged.loc[merged['COUNTY'] == 'DOAANA', 'COUNTY'] = 'DONAANA'
 merged.loc[merged['COUNTY'] == 'DONAANA', 'COUNTY_Name'] = 'DONA ANA'
@@ -297,6 +292,8 @@ fips_lookup_df = pd.DataFrame({
     'COUNTY': ['WRANGELL', 'ARKANSAS', 'DISTRICTOFCOLUMBIA', 'HAWAII', 'IDAHO',	'IOWA',	'NANTUCKETTOWN', 'DONAANA', 'NEWYORK', 'OKLAHOMA', 'UTAH'],
     'fipscode': ['02280', '05000', '11001', '15000', '16000', '19000', '25019', '35013', '36000', '40000', '49000']
 })
+fips_lookup_df['fipscode'] = fips_lookup_df['fipscode'].astype(str).str.zfill(5)
+
 merged = merged.merge(
     fips_lookup_df[['STATEABBRV', 'COUNTY', 'fipscode']],
     on=['STATEABBRV', 'COUNTY'],
@@ -305,6 +302,7 @@ merged = merged.merge(
 )
 
 merged['fipscode'] = merged['fipscode'].fillna(merged['fipscode_ref'])
+merged['fipscode'] = merged['fipscode'].astype(str).str.zfill(5)
 merged = merged.drop(columns=['fipscode_ref'])
 
 merged = merged.drop_duplicates()

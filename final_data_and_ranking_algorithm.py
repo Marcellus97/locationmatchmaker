@@ -23,6 +23,7 @@ cost_of_living_data = pd.read_excel(os.path.join(script_dir, "./static/data/silv
 
 def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     debug_print("Starting compute_ranking with user_input:", user_input)
+    static_merged_data['fipscode'] = static_merged_data['fipscode'].astype(str).str.zfill(5)
 
     # MERGE - Cost of living data with rest of the data to create the final dataset
     num_adults = int(user_input.get('num_adults') or 2)
@@ -44,6 +45,14 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
     df.drop(columns=['COUNTY_Name_right'], inplace=True)
     df['COUNTY_Name'] = df['COUNTY_Name'].str.upper()
     
+    def merge_duplicate_fipscode_rows(df):
+        merged = (
+            df.groupby('fipscode', as_index=False)
+            .agg(lambda x: x.ffill().bfill().iloc[0] if x.isnull().any() else x.iloc[0])
+        )
+        return merged
+    df = merge_duplicate_fipscode_rows(df)
+
     # DUPLICATES - Check
     dupes_only = (
         df.groupby(['STATE',"STATEABBRV", "COUNTY"])
@@ -52,6 +61,7 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
         .query('count > 1')
         )
     print(dupes_only)
+    df.to_excel(os.path.join(script_dir,"./static/data/output.xlsx"), index=False)
 
     try:
         # ---------- STATE FILTER ----------
@@ -94,7 +104,8 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
                 raise ValueError("method must be 'mean' or 'median'")
 
         # Analyze skewness
-        check_skew_col = df.columns.difference(['STATE',"STATEABBRV", "COUNTY", 'COUNTY_Name', "RISK_RATNG", "RESL_RATNG","Family"])
+        check_skew_col = df.columns.difference(['STATE',"STATEABBRV", "COUNTY", 'COUNTY_Name', 'fipscode', "RISK_RATNG", "RESL_RATNG","Family"])
+        
         skew_results = []
         for col in check_skew_col:
             skewness = df[col].skew()
@@ -105,7 +116,7 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
 
         # Fill missing values based on skewness analysis
         for col, _, method in skew_results:
-            df[col] = fill_missing_values(df, col, method=method)
+            df.loc[:,col] = fill_missing_values(df, col, method=method)
 
         debug_print("Data after filling missing values:\n", df.head())
             # Define rating order for categorical columns
@@ -257,8 +268,10 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
                                 'Monthly_Childcare', 'Monthly_Taxes', 'Monthly_Total'] 
             
         df = df[(df[required_features] != 0).all(axis=1)]
-        if features:      
-        # Normalize numeric features
+        
+        if len(features) > 0:     
+            debug_print("Ranking based on user-provided features.")
+            # Normalize numeric features
             scaler = MinMaxScaler()
             scale_features = df[features]
             df_scaled = scaler.fit_transform(scale_features)
@@ -280,10 +293,10 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
             # Compute ranking score
             df['ranking_score'] = sum(df[col + '_score'] * weights[col] for col in features)
         
-            cols = ['fipscode', 'STATE', 'COUNTY', 'rank', 'ranking_score'] + features
+            cols = ['fipscode', 'STATE', 'COUNTY', 'rank'] + features
 
         else:
-            # Fallback to equal weight on all numeric columns (with direction)
+            debug_print("Fallback to equal weight ranking.")
             fallback_features = [col for col in df.select_dtypes(include=[np.number]).columns if col not in excluded_keys]
 
             # Normalize the numeric features
@@ -311,11 +324,12 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
             
             # Compute ranking score
             df['ranking_score'] = df_scaled.apply(calculate_rank_score, axis=1)
-            cols = ['fipscode', 'STATE', 'COUNTY', 'rank', 'ranking_score'] + fallback_features
+            cols = ['fipscode', 'STATE', 'COUNTY', 'rank'] + fallback_features
 
 
         df['rank'] = df['ranking_score'].rank(ascending=False, method='dense')
-    
+        debug_print("Final ranking results:\n", df[['STATE', 'COUNTY', 'rank']].head())
+        
         # Exports ranked data to excel     
         # Comment this out for real use
         # df.to_excel(os.path.join(script_dir, "./static/data/gold/final_data_rank.xlsx"))
@@ -329,6 +343,10 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
         #     'num_adults','num_children']    
         #available_cols = [c for c in cols if c in df.columns]
         county_list     = df[df['rank'] <= 10][cols].sort_values(by='rank').reset_index(drop=True)
+        county_list = county_list.copy()  # safe practice if modifying in place
+        numeric_cols = county_list.select_dtypes(include='number').columns
+        county_list[numeric_cols] = county_list[numeric_cols].round(0).astype('Int64')
+        debug_print("Top 10 counties:\n", county_list)
 
         #Display the county/counties
         return county_list
@@ -336,100 +354,102 @@ def compute_ranking(static_merged_data, cost_of_living_data, user_input):
         debug_print("Error during ranking computation:", str(e))
         raise
 
-# Example
-user_input = {
-    'states':['OHIO', 'VIRGINIA'],
-    'num_adults': '',
-    'num_children': '',
-    'RISK_VALUE':'',
-    'RISK_VALUE_weight':'',
-    'RISK_SCORE':'',
-    'RISK_SCORE_weight':'',
-    'RISK_SPCTL':'',
-    'RISK_SPCTL_weight':'',
-    'RISK_RATNG':'',
-    'RISK_RATNG_weight':'',
-    'RESL_VALUE':'',
-    'RESL_VALUE_weight':'',
-    'RESL_SCORE':'',
-    'RESL_SCORE_weight':'',
-    'RESL_SPCTL':'',
-    'RESL_SPCTL_weight':'',
-    'RESL_RATNG':'',
-    'RESL_RATNG_weight':'',
-    'Monthly_Childcare':'',
-    'Monthly_Childcare_weight':'',
-    'Monthly_Food':'',
-    'Monthly_Food_weight':'', 
-    'Monthly_Healthcare':'',
-    'Monthly_Healthcare_weight':'',
-    'Monthly_Housing':'2000',
-    'Monthly_Housing_weight':'0.5',
-    'Monthly_Other Necessities ' :'',
-    'Monthly_Other Necessities _weight' :'',
-    'Monthly_Taxes':'',
-    'Monthly_Taxes_weight':'',
-    'Monthly_Total':'',
-    'Monthly_Total_weight':'',
-    'Monthly_Transportation':'',
-    'Monthly_Transportation_weight':'', 
-    'Access to Exercise Opportunities':'',
-    'Access to Exercise Opportunities_weight':'',
-    'Food Environment Index':'',
-    'Food Environment Index_weight':'',
-    'Primary Care Physicians':'',
-    'Primary Care Physicians_weight':'',
-    'Air Pollution: Particulate Matter':'',
-    'Air Pollution: Particulate Matter_weight':'',
-    'Broadband Access':'',
-    'Broadband Access_weight':'',
-    'Life Expectancy':'70',
-    'Life Expectancy_weight':'0.5',
-    'Traffic Volume':'',
-    'Traffic Volume_weight':'',
-    'Homeownership':'',
-    'Homeownership_weight':'',
-    'Access to Parks':'',
-    'Access to Parks_weight':'',
-    'Average Temperature F':'',
-    'Average Temperature F_weight':'',
-    'Maximum Temperature F':'',
-    'Maximum Temperature F_weight':'',
-    'Minimum Temperature F':'',
-    'Minimum Temperature F_weight':'',
-    'Precipitation_inches':'',
-    'Precipitation_inches_weight':'',
-    'median_sale_price':'',
-    'median_sale_price_weight':'',
-    'median_list_price':'',
-    'median_list_price_weight':'',
-    'median_ppsf':'',
-    'median_ppsf_weight':'',
-    'homes_sold':'',
-    'homes_sold_weight':'',
-    'new_listings':'',
-    'new_listings_weight':'',
-    'inventory':'',
-    'inventory_weight':'',
-    'months_of_supply':'',
-    'months_of_supply_weight':'',
-    'median_dom_months':'',
-    'median_dom_months_weight':'',
-    'Unemployment_Rate':'',
-    'Unemployment_Rate_weight':'',
-    'crime_rate_per_100000':'',
-    'crime_rate_per_100000_weight':''
-}
+if __name__ == "__main__":
+
+    # Example
+    user_input = {
+        'states':'',
+        'num_adults': '',
+        'num_children': '',
+        'RISK_VALUE':'',
+        'RISK_VALUE_weight':'',
+        'RISK_SCORE':'',
+        'RISK_SCORE_weight':'',
+        'RISK_SPCTL':'',
+        'RISK_SPCTL_weight':'',
+        'RISK_RATNG':'',
+        'RISK_RATNG_weight':'',
+        'RESL_VALUE':'',
+        'RESL_VALUE_weight':'',
+        'RESL_SCORE':'',
+        'RESL_SCORE_weight':'',
+        'RESL_SPCTL':'',
+        'RESL_SPCTL_weight':'',
+        'RESL_RATNG':'',
+        'RESL_RATNG_weight':'',
+        'Monthly_Childcare':'',
+        'Monthly_Childcare_weight':'',
+        'Monthly_Food':'',
+        'Monthly_Food_weight':'', 
+        'Monthly_Healthcare':'',
+        'Monthly_Healthcare_weight':'',
+        'Monthly_Housing':'',
+        'Monthly_Housing_weight':'',
+        'Monthly_Other Necessities ' :'',
+        'Monthly_Other Necessities _weight' :'',
+        'Monthly_Taxes':'',
+        'Monthly_Taxes_weight':'',
+        'Monthly_Total':'',
+        'Monthly_Total_weight':'',
+        'Monthly_Transportation':'',
+        'Monthly_Transportation_weight':'', 
+        'Access to Exercise Opportunities':'',
+        'Access to Exercise Opportunities_weight':'',
+        'Food Environment Index':'',
+        'Food Environment Index_weight':'',
+        'Primary Care Physicians':'',
+        'Primary Care Physicians_weight':'',
+        'Air Pollution: Particulate Matter':'',
+        'Air Pollution: Particulate Matter_weight':'',
+        'Broadband Access':'',
+        'Broadband Access_weight':'',
+        'Life Expectancy':'',
+        'Life Expectancy_weight':'',
+        'Traffic Volume':'',
+        'Traffic Volume_weight':'',
+        'Homeownership':'',
+        'Homeownership_weight':'',
+        'Access to Parks':'',
+        'Access to Parks_weight':'',
+        'Average Temperature F':'',
+        'Average Temperature F_weight':'',
+        'Maximum Temperature F':'',
+        'Maximum Temperature F_weight':'',
+        'Minimum Temperature F':'',
+        'Minimum Temperature F_weight':'',
+        'Precipitation_inches':'',
+        'Precipitation_inches_weight':'',
+        'median_sale_price':'',
+        'median_sale_price_weight':'',
+        'median_list_price':'',
+        'median_list_price_weight':'',
+        'median_ppsf':'',
+        'median_ppsf_weight':'',
+        'homes_sold':'',
+        'homes_sold_weight':'',
+        'new_listings':'',
+        'new_listings_weight':'',
+        'inventory':'',
+        'inventory_weight':'',
+        'months_of_supply':'',
+        'months_of_supply_weight':'',
+        'median_dom_months':'',
+        'median_dom_months_weight':'',
+        'Unemployment_Rate':'',
+        'Unemployment_Rate_weight':'',
+        'crime_rate_per_100000':'',
+        'crime_rate_per_100000_weight':''
+    }
 
 
-# user_input = {
-#     'state' :'ohio',
-#     'median_sale_price' : 500000,
-#     'median_sale_price_weight' : 0.8,
-#     'unemployment_rate' : 0.04,
-#     'unemployment_rate_weight' : 0.2
-# }
+    # user_input = {
+    #     'state' :'ohio',
+    #     'median_sale_price' : 500000,
+    #     'median_sale_price_weight' : 0.8,
+    #     'unemployment_rate' : 0.04,
+    #     'unemployment_rate_weight' : 0.2
+    # }
 
-result_within_state = compute_ranking(static_merged_data, cost_of_living_data, user_input)
+    result_within_state = compute_ranking(static_merged_data, cost_of_living_data, user_input)
 
-print(result_within_state)
+    print(result_within_state)

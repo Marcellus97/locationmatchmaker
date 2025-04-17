@@ -3,5 +3,4 @@ static/data/bronze
 d3-viz/node_modules
 .vscode
 static/data/.DS_Store
-final_data_and_ranking_algorithm2.py
-static/data/silver
+
