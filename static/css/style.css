@@ -82,25 +82,6 @@ input[type="range"] {
   transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
 }
 
-  .county-hover {
-    stroke: #007bff !important; /* Bold blue outline */
-    stroke-width: 3px !important;
-    fill: rgba(0, 123, 255, 0.3) !important; /* More vibrant blue fill */
-    filter: drop-shadow(0 0 5px rgba(0, 123, 255, 0.7)); /* Glow effect */
-    cursor: pointer;
-    transform: scale(1.02); /* Slight zoom effect */
-    transform-origin: center center;
-    z-index: 100; /* Bring to front */
-  }
-  
-  /* Style for counties that are in top 10 but not currently hovered */
-  .county-top10 {
-    stroke: green;
-    stroke-width: 2px;
-    fill: rgba(0, 255, 0, 0.2);
-    transition: all 0.3s ease;
-  }
-
 .county-info-box{
   position:absolute;          /* we position it dynamically in JS  */
   z-index:10;                 /* above the SVG                     */
