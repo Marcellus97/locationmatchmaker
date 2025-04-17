@@ -243,6 +243,7 @@ function resetMapCounties() {
 
 function updateList(ranks) {
   let updatedHtml = "";
+  ranks.sort((a,b) => a.rank - b.rank);
   ranks.forEach((r) => {
     updatedHtml += `<li class="top10Item" data-county-id="${r.fipscode}">${r.rank} - ${r.COUNTY} - ${r.STATE}</li>`;
   });

@@ -145,3 +145,20 @@ input[type="range"] {
   max-height: 260px;         /* adjust to taste */
   overflow-y: auto;
 }
+
+county-hover {
+  stroke: #007bff !important; /* Bold blue outline */
+  stroke-width: 3px !important;
+  fill: rgba(0, 123, 255, 0.4) !important; /* More vibrant blue fill */
+  filter: brightness(1.1); /* Subtle brightness increase instead of shadow */
+  z-index: 10; /* Ensure it's on top */
+  cursor: pointer;
+}
+
+/* Style for counties that are in top 10 but not currently hovered */
+.county-top10 {
+  stroke: green;
+  stroke-width: 2px;
+  fill: rgba(0, 255, 0, 0.2);
+  transition: all 0.3s ease;
+} 
