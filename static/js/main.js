@@ -177,6 +177,7 @@ function highlightMapCounties(counties) {
       countySvg.setAttribute("stroke", "green");
       countySvg.setAttribute("stroke-width", "2");
       countySvg.setAttribute("fill", "rgba(0, 255, 0, 0.2)"); // Light green fill
+      countySvg.classList.add("county-top10");
     }
   });
 }
@@ -199,16 +200,51 @@ function updateList(ranks) {
   attachHoverListeners(ranks);
 }
 
+function highlightCountyOnMap(countyId) {
+  // First reset any previous highlights to avoid confusion
+  document.querySelectorAll(".county-hover").forEach(county => {
+    county.classList.remove("county-hover");
+  });
+  
+  // Add hover highlight to the target county
+  const countyElement = document.querySelector(`#county-${countyId}`);
+  if (countyElement) {
+    countyElement.classList.add("county-hover");
+    
+    // Ensure this county is on top of others by appending it to its parent
+    const parent = countyElement.parentNode;
+    parent.appendChild(countyElement);
+  }
+}
+
 function highlightListItem(countyId) {
-  // Highlight the corresponding list item
-  document.querySelectorAll(".top10Item").forEach((item) => {
+  document.querySelectorAll(".top10Item").forEach(item => {
     if (item.dataset.countyId === countyId) {
       item.classList.add("highlighted");
+      
+      // Scroll the item into view if it's not already visible
+      const container = document.getElementById("top10List");
+      if (container.scrollHeight > container.clientHeight) {
+        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     } else {
       item.classList.remove("highlighted");
     }
   });
 }
+
+
+
+// function highlightListItem(countyId) {
+//   // Highlight the corresponding list item
+//   document.querySelectorAll(".top10Item").forEach((item) => {
+//     if (item.dataset.countyId === countyId) {
+//       item.classList.add("highlighted");
+//     } else {
+//       item.classList.remove("highlighted");
+//     }
+//   });
+// }
 
 function highlightCountyBorder(countyId) {
   // Highlight the corresponding county and hide others
