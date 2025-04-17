@@ -1,5 +1,5 @@
 import { getStates } from "./states";
-import { addFeature, smallFeaturesArray} from "./features";
+import { addFeature, smallFeaturesArray, } from "./features";
 
 function updateValue(id) {
   const slider = document.getElementById(id);
@@ -12,6 +12,8 @@ window.onload = function () {
   // buttonEventListener
   document.getElementById("resultsButton").addEventListener("onclick", getResults);
 
+
+  smallFeaturesArray().map((feature) => feature.id = feature.id + "-preference");
   const ids = [
     // "walkability",
     // "density",
