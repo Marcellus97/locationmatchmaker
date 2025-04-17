@@ -62,4 +62,17 @@ body {
       display: none;
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   }
-  
+
+  /* Highlighted list item */
+  .top10Item.highlighted {
+    background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
+    border-left: 4px solid #007bff; /* Blue border */
+    padding-left: 8px; /* Adjust padding to account for border */
+    font-weight: bold;
+    transition: background-color 0.3s ease, border-left 0.3s ease;
+  }
+
+  /* Smooth transition for county highlights */
+  .county {
+    transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
+  }

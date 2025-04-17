@@ -126,6 +126,7 @@ function getUserInput() {
   return input;
 }
 
+let currentTop10Geo = [];
 function getResults() {
   let userInput = getUserInput();
   console.log("getting results");
@@ -135,22 +136,28 @@ function getResults() {
     headers: {
       "Content-Type": "application/json",
     },
-    // replace with userInput
     body: JSON.stringify(userInput),
   }).then((body) => body.json());
 
-  //
   Promise.all([countyStatesPromise, apiPromise]).then((values) => {
     let counties = values[0].objects.counties;
     let ranks = values[1].results;
 
-    // filter counties
+    // Filter counties
     counties = counties.geometries.filter((d) =>
       ranks.some((r) => r.fipscode.toString() === d.id)
     );
 
+    currentTop10Geo = counties;             // save for later
     updateMap(counties);
     updateList(ranks);
+
+    // Highlight the top 10 counties on the map
+    highlightMapCounties(ranks);
+
+    // Attach hover listeners for the top 10 counties
+    attachHoverListeners(ranks, currentTop10Geo);
+    attachMapHoverListeners(ranks);
   });
 }
 
@@ -160,10 +167,13 @@ function updateMap(counties) {
 }
 
 function highlightMapCounties(counties) {
-  let idArray = counties.map((c) => "#county-" + c.id);
-  document.querySelectorAll(idArray).forEach((countySvg) => {
-    countySvg.setAttribute("class", "county county-highlighted");
-    countySvg.setAttribute("fill", "green");
+  counties.forEach((county) => {
+    const countySvg = document.querySelector(`#county-${county.id}`);
+    if (countySvg) {
+      countySvg.setAttribute("stroke", "green");
+      countySvg.setAttribute("stroke-width", "2");
+      countySvg.setAttribute("fill", "rgba(0, 255, 0, 0.2)"); // Light green fill
+    }
   });
 }
 
@@ -177,7 +187,105 @@ function resetMapCounties() {
 function updateList(ranks) {
   let updatedHtml = "";
   ranks.forEach((r) => {
-    updatedHtml += `<li class="top10Item">${r.rank} - ${r.COUNTY} - ${r.STATE}</li>`;
+    updatedHtml += `<li class="top10Item" data-county-id="${r.fipscode}">${r.rank} - ${r.COUNTY} - ${r.STATE}</li>`;
   });
   document.querySelector("#top10List").innerHTML = updatedHtml;
+
+  // Reattach hover event listeners after updating the list
+  attachHoverListeners(ranks);
 }
+
+function highlightListItem(countyId) {
+  // Highlight the corresponding list item
+  document.querySelectorAll(".top10Item").forEach((item) => {
+    if (item.dataset.countyId === countyId) {
+      item.classList.add("highlighted");
+    } else {
+      item.classList.remove("highlighted");
+    }
+  });
+}
+
+function highlightCountyBorder(countyId) {
+  // Highlight the corresponding county and hide others
+  document.querySelectorAll(".county").forEach((countySvg) => {
+    if (countySvg.id === `county-${countyId}`) {
+      countySvg.setAttribute("stroke", "#007bff"); // Modern blue color
+      countySvg.setAttribute("stroke-width", "3");
+      countySvg.setAttribute("fill", "rgba(0, 123, 255, 0.2)"); // Light blue fill
+      countySvg.style.display = "block"; // Ensure the highlighted county is visible
+    } else {
+      countySvg.style.display = "none"; // Hide other counties
+    }
+  });
+}
+
+function resetHighlights(top10Counties = []) {
+  /* clear all temporary highlights */
+  document.querySelectorAll(".top10Item").forEach((item) =>
+    item.classList.remove("highlighted")
+  );
+
+  document.querySelectorAll(".county").forEach((countySvg) => {
+    countySvg.style.display = "block";
+    countySvg.setAttribute("stroke", "#ddd");
+    countySvg.setAttribute("stroke-width", "1");
+    countySvg.setAttribute("fill", "white");
+  });
+
+  /* re‑apply the original green outlines */
+  top10Counties.forEach((c) => {
+    const id = c.id ?? c.fipscode;        // works for either object
+    const countySvg = document.querySelector(`#county-${id}`);
+    if (countySvg) {
+      countySvg.setAttribute("stroke", "green");
+      countySvg.setAttribute("stroke-width", "2");
+      countySvg.setAttribute("fill", "rgba(0,255,0,0.2)");
+    }
+  });
+}
+
+function attachHoverListeners(rankList, top10Geo) {
+  document.querySelectorAll(".top10Item").forEach((listItem) => {
+    listItem.addEventListener("mouseenter", () => {
+      const countyId = listItem.dataset.countyId;
+
+      // NEW – light‑blue highlight on the list itself
+      highlightListItem(countyId);
+
+      // keep the map behaviour you already had
+      highlightCountyBorder(countyId);
+    });
+
+    listItem.addEventListener("mouseleave", () => resetHighlights(top10Geo));
+  });
+}
+
+
+function attachMapHoverListeners(top10Geo) {
+  document.querySelectorAll(".county").forEach((countySvg) => {
+    countySvg.addEventListener("mouseenter", () => {
+      const countyId = countySvg.id.replace("county-", "");
+      highlightListItem(countyId);
+    });
+    countySvg.addEventListener("mouseleave", () => resetHighlights(top10Geo));
+  });
+}
+
+// Add hover event listeners for the map
+document.querySelectorAll(".county").forEach((countySvg) => {
+  countySvg.addEventListener("mouseenter", () => {
+    const countyId = countySvg.id.replace("county-", "");
+    highlightListItem(countyId);
+  });
+  countySvg.addEventListener("mouseleave", resetHighlights);
+});
+
+// Add hover event listeners for the top 10 list
+document.querySelectorAll(".top10Item").forEach((listItem) => {
+  listItem.addEventListener("mouseenter", () => {
+    const countyId = listItem.dataset.countyId;
+    highlightCountyBorder(countyId);
+  });
+  listItem.addEventListener("mouseleave", resetHighlights);
+});

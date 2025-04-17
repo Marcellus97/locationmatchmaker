@@ -5,3 +5,4 @@ scikit-learn
 flask
 openpyxl
 requests
+flask-cors

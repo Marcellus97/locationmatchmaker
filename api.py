@@ -4,11 +4,14 @@ import pandas as pd
 import os
 from flask import request, jsonify
 from final_data_and_ranking_algorithm import compute_ranking
+from flask_cors import CORS
 
 
-
-app = flask.Flask(__name__, )
+app = flask.Flask(__name__)
 app.config["DEBUG"] = True
+
+# Enable CORS for all routes
+CORS(app)
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
