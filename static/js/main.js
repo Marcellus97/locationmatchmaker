@@ -1,23 +1,44 @@
-function updateValue(id) {
-  const slider = document.getElementById(id);
-  const display = document.getElementById(id + "-value");
-  display.textContent = slider.value;
-}
+import { getStates } from "./states.js";
+import {
+  updateSliderValue,
+  addFeature,
+  smallFeaturesArray,
+  feature,
+} from "./features.js";
 
+window.updateSliderValue = updateSliderValue;
 // Set initial display values
 window.onload = function () {
-  const ids = [
-    // "walkability",
-    // "density",
-    // "warm-weather",
-    // "rain",
-    "housing-price",
-    "housing-preference",
-    // "job-prospects",
-  ];
-  ids.forEach((id) => updateValue(id));
+  // buttonEventListener
+  document
+    .getElementById("resultsButton")
+    .addEventListener("click", getResults);
 
-  updatedDropDownHtml = "";
+  // add feature sliders
+  smallFeaturesArray().forEach((feature) => {
+    addFeature(feature);
+  });
+
+  let featureIds = smallFeaturesArray().map((feature) => feature.id);
+  let prefIds = smallFeaturesArray().map(
+    (feature) => feature.id + "-preference"
+  );
+  const ids = featureIds
+    .concat(prefIds)
+    .concat(["housing-price", "housing-preference"]);
+  console.log(ids);
+  // const ids = [
+  // "walkability",
+  // "density",
+  // "warm-weather",
+  // "rain",
+  // "housing-price",
+  // "housing-preference",
+  // "job-prospects",
+  // ];
+  ids.forEach((id) => updateSliderValue(id));
+
+  let updatedDropDownHtml = "";
   getStates().forEach((s) => {
     let value = s == "--- ALL STATES ---" ? "" : s;
     updatedDropDownHtml += `<option value="${value}">${s}</option>`;
@@ -94,6 +115,7 @@ const test_data = {
 };
 
 function getUserInput() {
+  console.log("get user input");
   // clone
   let input = { ...test_data };
 
@@ -158,61 +180,4 @@ function updateList(ranks) {
     updatedHtml += `<li class="top10Item">${r.rank} - ${r.COUNTY} - ${r.STATE}</li>`;
   });
   document.querySelector("#top10List").innerHTML = updatedHtml;
-}
-
-function getStates() {
-  return [
-    "--- ALL STATES ---",
-    "ALABAMA",
-    "ALASKA",
-    "ARIZONA",
-    "ARKANSAS",
-    "CALIFORNIA",
-    "COLORADO",
-    "CONNECTICUT",
-    "DISTRICT OF COLUMBIA",
-    "DELAWARE",
-    "FLORIDA",
-    "GEORGIA",
-    "HAWAII",
-    "IDAHO",
-    "ILLINOIS",
-    "INDIANA",
-    "IOWA",
-    "KANSAS",
-    "KENTUCKY",
-    "LOUISIANA",
-    "MAINE",
-    "MARYLAND",
-    "MASSACHUSETTS",
-    "MICHIGAN",
-    "MINNESOTA",
-    "MISSISSIPPI",
-    "MISSOURI",
-    "MONTANA",
-    "NEBRASKA",
-    "NEVADA",
-    "NEW HAMPSHIRE",
-    "NEW JERSEY",
-    "NEW MEXICO",
-    "NEW YORK",
-    "NORTH CAROLINA",
-    "NORTH DAKOTA",
-    "OHIO",
-    "OKLAHOMA",
-    "OREGON",
-    "PENNSYLVANIA",
-    "RHODE ISLAND",
-    "SOUTH CAROLINA",
-    "SOUTH DAKOTA",
-    "TENNESSEE",
-    "TEXAS",
-    "UTAH",
-    "VERMONT",
-    "VIRGINIA",
-    "WASHINGTON",
-    "WEST VIRGINIA",
-    "WISCONSIN",
-    "WYOMING",
-  ];
 }
