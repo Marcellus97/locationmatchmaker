@@ -7,6 +7,7 @@ import {
 } from "./features.js";
 
 window.updateSliderValue = updateSliderValue;
+let stateChoices; // will be created later
 // Set initial display values
 window.onload = function () {
   // buttonEventListener
@@ -37,15 +38,24 @@ window.onload = function () {
   // "job-prospects",
   // ];
   ids.forEach((id) => updateSliderValue(id));
-
+  const dropDown = document.getElementById("stateDropdown");
   let updatedDropDownHtml = "";
   getStates().forEach((s) => {
     let value = s == "--- ALL STATES ---" ? "" : s;
     updatedDropDownHtml += `<option value="${value}">${s}</option>`;
   });
-  let dropDown = document.getElementById("stateDropdown");
+  // let dropDown = document.getElementById("stateDropdown");
   dropDown.innerHTML = updatedDropDownHtml;
   dropDown.selectedIndex = 0;
+
+  stateChoices = new Choices(dropDown, {
+    removeItemButton: true,
+    searchEnabled: true,
+    searchResultLimit: 50, // all 50 states → nothing trimmed
+    shouldSort: false,
+    placeholder: true,
+    placeholderValue: "Search or scroll…",
+  });
 };
 
 /*  D3.JS MAP CODE */
@@ -115,14 +125,19 @@ const test_data = {
 };
 
 function getUserInput() {
-  console.log("get user input");
-  // clone
-  let input = { ...test_data };
+  const input = { ...test_data };
 
-  input.state = document.getElementById("stateDropdown").value;
-  input["median_sale_price"] = document.getElementById("housing-price").value;
-  // input["housingPreference"] = document.getElementById("housing-preference").value;
+  const states = stateChoices.getValue(true); // ["FLORIDA", "TEXAS"]
+  // if (states.length) {
+  //   input.states = states; // multi-state or single state as a list
+  // } else {
+  //   const allOpt = document.getElementById("stateDropdown").selectedOptions[0];
+  //   const singleState = allOpt ? allOpt.value : ""; // empty string means ALL
+  //   input.states = singleState ? [singleState] : []; // Treat single state as a list
+  // }
 
+  input.states = stateChoices.getValue(true);
+  input.median_sale_price = +document.getElementById("housing-price").value;
   return input;
 }
 
@@ -132,7 +147,7 @@ let activeCountyId = null; // keeps track of the open card
 
 function getResults() {
   let userInput = getUserInput();
-  console.log("getting results");
+  console.log("getting results for user input", userInput);
 
   const apiPromise = fetch("http://localhost:8080/api/ranking", {
     method: "POST",
@@ -164,6 +179,43 @@ function getResults() {
     attachMapHoverListeners(currentTop10Geo);
   });
 }
+
+// function getResults(){
+//   fetch("http://localhost:8080/api/ranking",{
+//       method:"POST",
+//       headers:{ "Content-Type":"application/json" },
+//       body:JSON.stringify(getUserInput())
+//   })
+//   .then(res=>{
+//       if(!res.ok) throw new Error(`Server error ${res.status}`);
+//       return res.json();
+//   })
+//   .then(data=>{
+//       currentTop10Data = data.results;
+//       updateList(currentTop10Data);
+
+//       // geo filter
+//       const counties = countyStatesPromise.then(cjson=>{
+//         const all = cjson.objects.counties;
+//         return all.geometries.filter(g =>
+//           currentTop10Data.some(r => r.fipscode.toString() === g.id)
+//         );
+//       });
+
+//       counties.then(geos=>{
+//         currentTop10Geo = geos;
+//         updateMap(geos);
+//         highlightMapCounties(geos);
+//         attachHoverListeners(currentTop10Geo);
+//         attachMapHoverListeners(currentTop10Geo);
+//       });
+//   })
+//   .catch(err=>{
+//       console.error(err);
+//       alert("Server error – see console for details.");
+//   });
+// }
+
 
 function updateMap(counties) {
   resetMapCounties();
@@ -202,15 +254,15 @@ function updateList(ranks) {
 
 function highlightCountyOnMap(countyId) {
   // First reset any previous highlights to avoid confusion
-  document.querySelectorAll(".county-hover").forEach(county => {
+  document.querySelectorAll(".county-hover").forEach((county) => {
     county.classList.remove("county-hover");
   });
-  
+
   // Add hover highlight to the target county
   const countyElement = document.querySelector(`#county-${countyId}`);
   if (countyElement) {
     countyElement.classList.add("county-hover");
-    
+
     // Ensure this county is on top of others by appending it to its parent
     const parent = countyElement.parentNode;
     parent.appendChild(countyElement);
@@ -218,22 +270,20 @@ function highlightCountyOnMap(countyId) {
 }
 
 function highlightListItem(countyId) {
-  document.querySelectorAll(".top10Item").forEach(item => {
+  document.querySelectorAll(".top10Item").forEach((item) => {
     if (item.dataset.countyId === countyId) {
       item.classList.add("highlighted");
-      
+
       // Scroll the item into view if it's not already visible
       const container = document.getElementById("top10List");
       if (container.scrollHeight > container.clientHeight) {
-        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        item.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
     } else {
       item.classList.remove("highlighted");
     }
   });
 }
-
-
 
 // function highlightListItem(countyId) {
 //   // Highlight the corresponding list item
@@ -298,49 +348,48 @@ function resetHighlights(top10Geo = []) {
   }
 }
 
-function attachHoverListeners(top10Geo){
-  document.querySelectorAll(".top10Item").forEach(listItem=>{
+function attachHoverListeners(top10Geo) {
+  document.querySelectorAll(".top10Item").forEach((listItem) => {
     const countyId = listItem.dataset.countyId;
 
-    listItem.addEventListener("mouseenter", ()=>{
-      if (activeCountyId) return;             // ⇐ hover disabled when card open
+    listItem.addEventListener("mouseenter", () => {
+      if (activeCountyId) return; // ⇐ hover disabled when card open
       highlightListItem(countyId);
       highlightCountyBorder(countyId);
     });
 
-    listItem.addEventListener("mouseleave", ()=>{
-      if (activeCountyId) return;             // ⇐ same guard
+    listItem.addEventListener("mouseleave", () => {
+      if (activeCountyId) return; // ⇐ same guard
       resetHighlights(top10Geo);
     });
 
     /* click still shows / toggles the stats card */
-    listItem.addEventListener("click", e=>{
+    listItem.addEventListener("click", (e) => {
       showCountyStats(countyId, e);
     });
   });
 }
 
-function attachMapHoverListeners(top10Geo){
-  document.querySelectorAll(".county").forEach(countySvg=>{
-    const countyId = countySvg.id.replace("county-","");
+function attachMapHoverListeners(top10Geo) {
+  document.querySelectorAll(".county").forEach((countySvg) => {
+    const countyId = countySvg.id.replace("county-", "");
 
-    countySvg.addEventListener("mouseenter", ()=>{
-      if (activeCountyId) return;             // ⇐ hover disabled when card open
+    countySvg.addEventListener("mouseenter", () => {
+      if (activeCountyId) return; // ⇐ hover disabled when card open
       highlightListItem(countyId);
       highlightCountyBorder(countyId);
     });
 
-    countySvg.addEventListener("mouseleave", ()=>{
-      if (activeCountyId) return;             // ⇐ same guard
+    countySvg.addEventListener("mouseleave", () => {
+      if (activeCountyId) return; // ⇐ same guard
       resetHighlights(top10Geo);
     });
 
-    countySvg.addEventListener("click", e=>{
-      showCountyStats(countyId, e);           // stats card toggle
+    countySvg.addEventListener("click", (e) => {
+      showCountyStats(countyId, e); // stats card toggle
     });
   });
 }
-
 
 // Add hover event listeners for the map
 document.querySelectorAll(".county").forEach((countySvg) => {

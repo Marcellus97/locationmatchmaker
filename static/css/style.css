@@ -123,3 +123,25 @@ input[type="range"] {
 
 
 /* keep it above the SVG */
+
+
+.choices__inner{
+  border-radius:.375rem;          /* same as .form-select */
+}
+.choices__item--choice{
+  padding:.35rem .75rem;
+}
+.choices__item--selectable{
+  background:#0d6efd;             /* Bootstrap primary */
+  color:#fff;
+  border:0;
+  margin:.15rem .25rem;
+}
+.choices__item--remove{
+  margin-left:.25rem;
+}
+/* limit height of the open list, then make it scroll */
+.choices__list--dropdown{
+  max-height: 260px;         /* adjust to taste */
+  overflow-y: auto;
+}

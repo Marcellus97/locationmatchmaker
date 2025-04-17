@@ -28,23 +28,31 @@ def get_index():
 
 @app.route("/api/ranking", methods=["POST"])
 def get_ranking():
-    user_input = request.get_json()
-    
-    if not user_input:
-        return jsonify({"error": "No data provided"}), 400
-
     try:
+        user_input = request.get_json()
+        app.logger.info("INPUT %s", user_input)
+
+        if not user_input:
+            return jsonify({"error": "No data provided"}), 400
+
         result = compute_ranking(static_merged_data, cost_of_living_data, user_input)
-        
+
+        if result.empty:
+            return jsonify({"error": "No results found for the given input."}), 404
+
         result_json = result.to_dict(orient='records')
-        # print('printing result...', result_json)
         return jsonify({"results": result_json})
-        
+
+    except ValueError as ve:
+        app.logger.error("ValueError in get_ranking (Line 15): %s", str(ve))
+        return jsonify({"error": str(ve)}), 400
+
     except Exception as e:
         import traceback
+        app.logger.error("Exception in get_ranking (Line 20): %s", traceback.format_exc())
         return jsonify({
-            "error": str(e),
-            "traceback": traceback.format_exc()
+            "error": "An unexpected error occurred.",
+            "details": str(e)
         }), 500
 
 if __name__ == "__main__":
