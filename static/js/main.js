@@ -4,12 +4,24 @@ import {
   addFeature,
   smallFeaturesArray,
   feature,
+  featuresArray,
+  featuresObjects,
+  hideShowSlider,
+  generateFeatureCheckboxes
 } from "./features.js";
 
 window.updateSliderValue = updateSliderValue;
+window.hideShowSlider = hideShowSlider;
+
 let stateChoices; // will be created later
+let featureChoices; // will be created later
 // Set initial display values
 window.onload = function () {
+  document.getElementById("checkbox-container").innerHTML = generateFeatureCheckboxes();
+  document.querySelectorAll(".form-check-input").forEach(input => {
+    input.addEventListener("change", hideShowSlider);
+  });
+
   // buttonEventListener
   document
     .getElementById("resultsButton")
@@ -21,9 +33,7 @@ window.onload = function () {
   });
 
   let featureIds = smallFeaturesArray().map((feature) => feature.id);
-  let prefIds = smallFeaturesArray().map(
-    (feature) => feature.id + "-weight"
-  );
+  let prefIds = smallFeaturesArray().map((feature) => feature.id + "-weight");
   const ids = featureIds
     .concat(prefIds)
     .concat(["housing-price", "housing-price-weight"]);
@@ -68,6 +78,7 @@ var svg = d3
   .select("svg")
   .attr("width", width)
   .attr("height", height)
+  // .attr("viewBox", [0, 0, 500, 500])
   .attr("viewBox", [0, 0, width, height])
   .attr("style", "max-width: 100%; height: auto;");
 
@@ -216,7 +227,6 @@ function getResults() {
 //   });
 // }
 
-
 function updateMap(counties) {
   resetMapCounties();
   highlightMapCounties(counties);
@@ -243,7 +253,7 @@ function resetMapCounties() {
 
 function updateList(ranks) {
   let updatedHtml = "";
-  ranks.sort((a,b) => a.rank - b.rank);
+  ranks.sort((a, b) => a.rank - b.rank);
   ranks.forEach((r) => {
     updatedHtml += `<li class="top10Item" data-county-id="${r.fipscode}">${r.rank} - ${r.COUNTY} - ${r.STATE}</li>`;
   });

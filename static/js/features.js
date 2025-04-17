@@ -8,6 +8,21 @@ export function updateSliderValue(id) {
   }
 }
 
+export function hideShowSlider(event) {
+    // convert to feature id
+    let featureId = event.target.id.replace("Checkbox", "");
+  if(this.checked) {
+    // document.querySelector(`.slider-group:has(#${featureId})`).style.display = true;
+    console.log(featureId)
+    let obj = featuresObjects()[featureId];
+    console.log(obj)
+    addFeature(obj); 
+  } else {
+    //hide
+    document.querySelector(`.slider-group:has(#${featureId})`).style.display = 'none';
+  }
+}
+
 export function feature(featureParameters) {
   const {
     name,
@@ -22,12 +37,13 @@ export function feature(featureParameters) {
   const valueId = id + "-value";
   const weightValueId = weightId + "-value";
   return `
+  <div class="slider-group">
       <div class="slider-container">
         <div class="fw-bold fs-5 mb-2">${category}</div>
         <label class="d-inline" for="${id}"
           >${name}
           <input
-            class="d-inline"
+            class="d-inline featureSlider"
             type="range"
             id="${id}"
             name="${id}"
@@ -44,7 +60,7 @@ export function feature(featureParameters) {
       <div class="slider-container">
         <label for="${weightId}">weight</label>
         <input
-          class="d-inline"
+          class="d-inline featureWeightSlider"
           type="range"
           id="${weightId}"
           name="${weightId}"
@@ -57,7 +73,27 @@ export function feature(featureParameters) {
         <span class="value-display" id="${weightValueId}">5</span>
       </div>
       <hr />
+    </div>
     `;
+}
+
+export function generateFeatureCheckboxes() {
+  const features = featuresArray();
+
+  let html = "";
+
+  features.forEach((feature) => {
+    html += `
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="${feature.id}Checkbox">
+        <label class="form-check-label" for="${feature.id}Checkbox">
+          ${feature.name}
+        </label>
+      </div>
+    `;
+  });
+
+  return html;
 }
 
 export function addFeature(featureObject) {
@@ -100,65 +136,211 @@ export function smallFeaturesArray() {
 
 export function featuresObjects() {
   return {
-    numAdults: { name: "Num Adults", category: "Other" },
-    numChildren: { name: "Num Children", category: "Other" },
-    riskValue: { name: "Risk Value", category: "Natural Disasters" },
-    riskScore: { name: "Risk Score", category: "Natural Disasters" },
-    riskSpctl: { name: "Risk Spctl", category: "Natural Disasters" },
-    riskRatng: { name: "Risk Ratng", category: "Natural Disasters" },
-    reslValue: { name: "Resl Value", category: "Natural Disasters" },
-    reslScore: { name: "Resl Score", category: "Natural Disasters" },
-    reslSpctl: { name: "Resl Spctl", category: "Natural Disasters" },
-    reslRatng: { name: "Resl Ratng", category: "Natural Disasters" },
-    monthlyChildcare: { name: "Monthly Childcare", category: "Expenses" },
-    monthlyFood: { name: "Monthly Food", category: "Expenses" },
-    monthlyHealthcare: { name: "Monthly Healthcare", category: "Expenses" },
-    monthlyHousing: { name: "Monthly Housing", category: "Housing" },
+    numAdults: {
+      id: "numAdults",
+      name: "Num Adults",
+      category: "Other",
+    },
+    numChildren: {
+      id: "numChildren",
+      name: "Num Children",
+      category: "Other",
+    },
+    riskValue: {
+      id: "riskValue",
+      name: "Risk Value",
+      category: "Natural Disasters",
+    },
+    riskScore: {
+      id: "riskScore",
+      name: "Risk Score",
+      category: "Natural Disasters",
+    },
+    riskSpctl: {
+      id: "riskSpctl",
+      name: "Risk Spctl",
+      category: "Natural Disasters",
+    },
+    riskRatng: {
+      id: "riskRatng",
+      name: "Risk Ratng",
+      category: "Natural Disasters",
+    },
+    reslValue: {
+      id: "reslValue",
+      name: "Resl Value",
+      category: "Natural Disasters",
+    },
+    reslScore: {
+      id: "reslScore",
+      name: "Resl Score",
+      category: "Natural Disasters",
+    },
+    reslSpctl: {
+      id: "reslSpctl",
+      name: "Resl Spctl",
+      category: "Natural Disasters",
+    },
+    reslRatng: {
+      id: "reslRatng",
+      name: "Resl Ratng",
+      category: "Natural Disasters",
+    },
+    monthlyChildcare: {
+      id: "monthlyChildcare",
+      name: "Monthly Childcare",
+      category: "Expenses",
+    },
+    monthlyFood: {
+      id: "monthlyFood",
+      name: "Monthly Food",
+      category: "Expenses",
+    },
+    monthlyHealthcare: {
+      id: "monthlyHealthcare",
+      name: "Monthly Healthcare",
+      category: "Expenses",
+    },
+    monthlyHousing: {
+      id: "monthlyHousing",
+      name: "Monthly Housing",
+      category: "Housing",
+    },
     monthlyOtherNecessities: {
+      id: "monthlyOtherNecessities",
       name: "Monthly Other Necessities",
       category: "Expenses",
     },
-    monthlyTaxes: { name: "Monthly Taxes", category: "Expenses" },
-    monthlyTotal: { name: "Monthly Total", category: "Expenses" },
+    monthlyTaxes: {
+      id: "monthlyTaxes",
+      name: "Monthly Taxes",
+      category: "Expenses",
+    },
+    monthlyTotal: {
+      id: "monthlyTotal",
+      name: "Monthly Total",
+      category: "Expenses",
+    },
     monthlyTransportation: {
+      id: "monthlyTransportation",
       name: "Monthly Transportation",
       category: "Expenses",
     },
     accessToExerciseOpportunities: {
+      id: "accessToExerciseOpportunities",
       name: "Access To Exercise Opportunities",
       category: "Amenities",
     },
     foodEnvironmentIndex: {
+      id: "foodEnvironmentIndex",
       name: "Food Environment Index",
       category: "Amenities",
     },
     primaryCarePhysicians: {
+      id: "primaryCarePhysicians",
       name: "Primary Care Physicians",
       category: "Amenities",
     },
     airPollutionParticulateMatter: {
+      id: "airPollutionParticulateMatter",
       name: "Air Pollution Particulate Matter",
       category: "Weather",
     },
-    broadbandAccess: { name: "Broadband Access", category: "Amenities" },
-    lifeExpectancy: { name: "Life Expectancy", category: "Other" },
-    trafficVolume: { name: "Traffic Volume", category: "Other" },
-    homeownership: { name: "Homeownership", category: "Housing" },
-    accessToParks: { name: "Access To Parks", category: "Amenities" },
-    averageTemperatureF: { name: "Average Temperature F", category: "Weather" },
-    maximumTemperatureF: { name: "Maximum Temperature F", category: "Weather" },
-    minimumTemperatureF: { name: "Minimum Temperature F", category: "Weather" },
-    precipitationInches: { name: "Precipitation Inches", category: "Weather" },
-    medianSalePrice: { name: "Median Sale Price", category: "Housing" },
-    medianListPrice: { name: "Median List Price", category: "Housing" },
-    medianPpsf: { name: "Median Ppsf", category: "Housing" },
-    homesSold: { name: "Homes Sold", category: "Housing" },
-    newListings: { name: "New Listings", category: "Housing" },
-    inventory: { name: "Inventory", category: "Housing" },
-    monthsOfSupply: { name: "Months Of Supply", category: "Housing" },
-    medianDomMonths: { name: "Median Dom Months", category: "Housing" },
-    unemploymentRate: { name: "Unemployment Rate", category: "Other" },
-    crimeRatePer100000: { name: "Crime Rate Per", category: "Crime" },
+    broadbandAccess: {
+      id: "broadbandAccess",
+      name: "Broadband Access",
+      category: "Amenities",
+    },
+    lifeExpectancy: {
+      id: "lifeExpectancy",
+      name: "Life Expectancy",
+      category: "Other",
+    },
+    trafficVolume: {
+      id: "trafficVolume",
+      name: "Traffic Volume",
+      category: "Other",
+    },
+    homeownership: {
+      id: "homeownership",
+      name: "Homeownership",
+      category: "Housing",
+    },
+    accessToParks: {
+      id: "accessToParks",
+      name: "Access To Parks",
+      category: "Amenities",
+    },
+    averageTemperatureF: {
+      id: "averageTemperatureF",
+      name: "Average Temperature F",
+      category: "Weather",
+    },
+    maximumTemperatureF: {
+      id: "maximumTemperatureF",
+      name: "Maximum Temperature F",
+      category: "Weather",
+    },
+    minimumTemperatureF: {
+      id: "minimumTemperatureF",
+      name: "Minimum Temperature F",
+      category: "Weather",
+    },
+    precipitationInches: {
+      id: "precipitationInches",
+      name: "Precipitation Inches",
+      category: "Weather",
+    },
+    medianSalePrice: {
+      id: "medianSalePrice",
+      name: "Median Sale Price",
+      category: "Housing",
+    },
+    medianListPrice: {
+      id: "medianListPrice",
+      name: "Median List Price",
+      category: "Housing",
+    },
+    medianPpsf: {
+      id: "medianPpsf",
+      name: "Median Ppsf",
+      category: "Housing",
+    },
+    homesSold: {
+      id: "homesSold",
+      name: "Homes Sold",
+      category: "Housing",
+    },
+    newListings: {
+      id: "newListings",
+      name: "New Listings",
+      category: "Housing",
+    },
+    inventory: {
+      id: "inventory",
+      name: "Inventory",
+      category: "Housing",
+    },
+    monthsOfSupply: {
+      id: "monthsOfSupply",
+      name: "Months Of Supply",
+      category: "Housing",
+    },
+    medianDomMonths: {
+      id: "medianDomMonths",
+      name: "Median Dom Months",
+      category: "Housing",
+    },
+    unemploymentRate: {
+      id: "unemploymentRate",
+      name: "Unemployment Rate",
+      category: "Other",
+    },
+    crimeRatePer100000: {
+      id: "crimeRatePer100000",
+      name: "Crime Rate Per",
+      category: "Crime",
+    },
   };
 }
 
