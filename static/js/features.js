@@ -17,6 +17,7 @@ export function feature(featureParameters) {
     step,
     // value,
     id,
+    dataFrameKey
   } = featureParameters;
   // if ()
   const value = (max - min) / 2;
@@ -24,7 +25,7 @@ export function feature(featureParameters) {
   const weightId = id + "-weight";
   const valueId = id + "-value";
   const weightValueId = weightId + "-value";
-  return `
+  let html =`
   <div class="slider-group d-none">
       <div class="slider-container">
         <div class="fw-bold fs-5 mb-2">${category}</div>
@@ -40,11 +41,18 @@ export function feature(featureParameters) {
             step="${step}"
             value="${value}"
             oninput="updateSliderValue('${id}')"
+            dataFrameKey="${dataFrameKey}"
           />
         </label>
         <span class="value-display" id="${valueId}">${value}</span>
-      </div>
+      </div>`;
 
+      // these should not have slider weights. Probably can change the input type...
+      if (id === "numAdults" || id === "numChildren") {
+        return html;
+      }
+
+      html += `
       <div class="slider-container">
         <label for="${weightId}">weight</label>
         <input
@@ -57,17 +65,18 @@ export function feature(featureParameters) {
           step="1"
           value="5"
           oninput="updateSliderValue('${weightId}')"
+          dataFrameKey="${dataFrameKey}_weight"
         />
         <span class="value-display" id="${weightValueId}">5</span>
       </div>
       <hr />
     </div>
     `;
+    return html;
 }
 
 export function getCurrentDisplayedFeatureSliders() {
   Object.values(featuresObjects()).filter(feature => {
-
     document.querySelector('div:not(.d-none) input[name="numAdults"])');
   })
   
@@ -135,7 +144,8 @@ export function featuresObjects() {
       category: "Other",
       min: 0,
       max: 4,
-      step: 1
+      step: 1,
+      dataFrameKey: "num_adults"
     },
     numChildren: {
       id: "numChildren",
@@ -143,7 +153,8 @@ export function featuresObjects() {
       category: "Other",
       min: 0,
       max: 4,
-      step: 1
+      step: 1,
+      dataFrameKey: "num_children"
     },
     riskValue: {
       id: "riskValue",
@@ -151,7 +162,8 @@ export function featuresObjects() {
       category: "Natural Disasters",
       min: 35741.265923,
       max: 5326193000,
-      step: 1
+      step: 1,
+      dataFrameKey: "RISK_VALUE"
     },
     riskScore: {
       id: "riskScore",
@@ -159,7 +171,8 @@ export function featuresObjects() {
       category: "Natural Disasters",
       min: 0.031817,
       max: 100,
-      step: 1
+      step: 1,
+      dataFrameKey: "RISK_SCORE"
     },
     riskSpctl: {
       id: "riskSpctl",
@@ -167,7 +180,8 @@ export function featuresObjects() {
       category: "Natural Disasters",
       min: 0.393701,
       max: 100,
-      step: 1
+      step: 1,
+      dataFrameKey: "RISK_SPCTL"
     },
     riskRatng: {
       id: "riskRatng",
@@ -175,7 +189,8 @@ export function featuresObjects() {
       category: "Natural Disasters",
       min: 1.0,
       max: 5.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "RISK_RATNG"
     },
     reslValue: {
       id: "reslValue",
@@ -183,7 +198,8 @@ export function featuresObjects() {
       category: "Natural Disasters",
       min: 1.810037,
       max: 3.013601,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "RESL_VALUE"
     },
     reslScore: {
       id: "reslScore",
@@ -191,7 +207,8 @@ export function featuresObjects() {
       category: "Natural Disasters",
       min: 0.0,
       max: 100,
-      step: 1
+      step: 1,
+      dataFrameKey: "RESL_SCORE"
     },
     reslSpctl: {
       id: "reslSpctl",
@@ -199,7 +216,8 @@ export function featuresObjects() {
       category: "Natural Disasters",
       min: 0.003937,
       max: 1.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "RESL_SPCTL"
     },
     reslRatng: {
       id: "reslRatng",
@@ -207,7 +225,8 @@ export function featuresObjects() {
       category: "Natural Disasters",
       min: 1.0,
       max: 5.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "RESL_RATNG"
     },
     monthlyChildcare: {
       id: "monthlyChildcare",
@@ -215,7 +234,8 @@ export function featuresObjects() {
       category: "Expenses",
       min: 0.0,
       max: 0.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Monthly_Childcare"
     },
     monthlyFood: {
       id: "monthlyFood",
@@ -223,7 +243,8 @@ export function featuresObjects() {
       category: "Expenses",
       min: 470.497883,
       max: 1359.791,
-      step: 1
+      step: 1,
+      dataFrameKey: "Monthly_Food"
     },
     monthlyHealthcare: {
       id: "monthlyHealthcare",
@@ -231,7 +252,8 @@ export function featuresObjects() {
       category: "Expenses",
       min: 641.685592,
       max: 1629.243,
-      step: 1
+      step: 1,
+      dataFrameKey: "Monthly_Healthcare"
     },
     monthlyHousing: {
       id: "monthlyHousing",
@@ -239,7 +261,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 432.094033,
       max: 3135.993,
-      step: 1
+      step: 1,
+      dataFrameKey: "Monthly_Housing"
     },
     monthlyOtherNecessities: {
       id: "monthlyOtherNecessities",
@@ -247,7 +270,8 @@ export function featuresObjects() {
       category: "Expenses",
       min: 326.877425,
       max: 1324.181,
-      step: 1
+      step: 1,
+      dataFrameKey: "Monthly_Other Necessities"
     },
     monthlyTaxes: {
       id: "monthlyTaxes",
@@ -255,7 +279,8 @@ export function featuresObjects() {
       category: "Expenses",
       min: 448.52425,
       max: 1562.971,
-      step: 1
+      step: 1,
+      dataFrameKey: "Monthly_Taxes"
     },
     monthlyTotal: {
       id: "monthlyTotal",
@@ -263,7 +288,8 @@ export function featuresObjects() {
       category: "Expenses",
       min: 4121.942083,
       max: 9408.988,
-      step: 1
+      step: 1,
+      dataFrameKey: "Monthly_Total"
     },
     monthlyTransportation: {
       id: "monthlyTransportation",
@@ -271,7 +297,8 @@ export function featuresObjects() {
       category: "Expenses",
       min: 557.01355,
       max: 1788.996,
-      step: 1
+      step: 1,
+      dataFrameKey: "Monthly_Transportation"
     },
     accessToExerciseOpportunities: {
       id: "accessToExerciseOpportunities",
@@ -279,7 +306,8 @@ export function featuresObjects() {
       category: "Amenities",
       min: 0.0,
       max: 1.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Access to Exercise Opportunities"
     },
     foodEnvironmentIndex: {
       id: "foodEnvironmentIndex",
@@ -287,7 +315,8 @@ export function featuresObjects() {
       category: "Amenities",
       min: 0.0,
       max: 10.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Food Environment Index"
     },
     primaryCarePhysicians: {
       id: "primaryCarePhysicians",
@@ -295,7 +324,8 @@ export function featuresObjects() {
       category: "Amenities",
       min: 0.0,
       max: 0.005805274,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Primary Care Physicians"
     },
     airPollutionParticulateMatter: {
       id: "airPollutionParticulateMatter",
@@ -303,7 +333,8 @@ export function featuresObjects() {
       category: "Weather",
       min: 1.3,
       max: 39.1,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Air Pollution: Particulate Matter"
     },
     broadbandAccess: {
       id: "broadbandAccess",
@@ -311,7 +342,8 @@ export function featuresObjects() {
       category: "Amenities",
       min: 0.481383,
       max: 1.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Broadband Access"
     },
     lifeExpectancy: {
       id: "lifeExpectancy",
@@ -319,7 +351,8 @@ export function featuresObjects() {
       category: "Other",
       min: 53.980813,
       max: 94.21899,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Life Expectancy"
     },
     trafficVolume: {
       id: "trafficVolume",
@@ -327,7 +360,8 @@ export function featuresObjects() {
       category: "Other",
       min: 0.000332,
       max: 1753.935,
-      step: 1
+      step: 1,
+      dataFrameKey: "Traffic Volume"
     },
     homeownership: {
       id: "homeownership",
@@ -335,7 +369,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 0.0,
       max: 0.9738527,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Homeownership"
     },
     accessToParks: {
       id: "accessToParks",
@@ -343,7 +378,8 @@ export function featuresObjects() {
       category: "Amenities",
       min: 0.0,
       max: 1.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Access to Parks"
     },
     averageTemperatureF: {
       id: "averageTemperatureF",
@@ -351,7 +387,8 @@ export function featuresObjects() {
       category: "Weather",
       min: 18.1,
       max: 77.7,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Average Temperature F"
     },
     maximumTemperatureF: {
       id: "maximumTemperatureF",
@@ -359,7 +396,8 @@ export function featuresObjects() {
       category: "Weather",
       min: 25.0,
       max: 89.8,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Maximum Temperature F"
     },
     minimumTemperatureF: {
       id: "minimumTemperatureF",
@@ -367,7 +405,8 @@ export function featuresObjects() {
       category: "Weather",
       min: 11.2,
       max: 70.2,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Minimum Temperature F"
     },
     precipitationInches: {
       id: "precipitationInches",
@@ -375,7 +414,8 @@ export function featuresObjects() {
       category: "Weather",
       min: 0.99,
       max: 206.04,
-      step: 1
+      step: 1,
+      dataFrameKey: "Precipitation_inches"
     },
     medianSalePrice: {
       id: "medianSalePrice",
@@ -383,7 +423,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 8000.0,
       max: 3892704.0,
-      step: 1
+      step: 1,
+      dataFrameKey: "median_sale_price"
     },
     medianListPrice: {
       id: "medianListPrice",
@@ -391,7 +432,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 14900.0,
       max: 4718182.0,
-      step: 1
+      step: 1,
+      dataFrameKey: "median_list_price"
     },
     medianPpsf: {
       id: "medianPpsf",
@@ -399,7 +441,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 9.52,
       max: 6817.84,
-      step: 1
+      step: 1,
+      dataFrameKey: "median_ppsf"
     },
     homesSold: {
       id: "homesSold",
@@ -407,7 +450,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 0.0,
       max: 56353.0,
-      step: 1
+      step: 1,
+      dataFrameKey: "homes_sold"
     },
     newListings: {
       id: "newListings",
@@ -415,7 +459,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 0.0,
       max: 74105.0,
-      step: 1
+      step: 1,
+      dataFrameKey: "new_listings"
     },
     inventory: {
       id: "inventory",
@@ -423,7 +468,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 0.0,
       max: 194641.0,
-      step: 1
+      step: 1,
+      dataFrameKey: "inventory"
     },
     monthsOfSupply: {
       id: "monthsOfSupply",
@@ -431,7 +477,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 0.0,
       max: 99.0,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "months_of_supply"
     },
     medianDomMonths: {
       id: "medianDomMonths",
@@ -439,7 +486,8 @@ export function featuresObjects() {
       category: "Housing",
       min: 0.29,
       max: 46.64,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "median_dom_months"
     },
     unemploymentRate: {
       id: "unemploymentRate",
@@ -447,7 +495,8 @@ export function featuresObjects() {
       category: "Other",
       min: 0.3,
       max: 17.3,
-      step: 0.5
+      step: 0.5,
+      dataFrameKey: "Unemployment_Rate"
     },
     crimeRatePer100000: {
       id: "crimeRatePer100000",
@@ -455,10 +504,12 @@ export function featuresObjects() {
       category: "Crime",
       min: 0.0,
       max: 1754.915,
-      step: 1
+      step: 1,
+      dataFrameKey: "crime_rate_per_100000"
     }
   };
 }
+
 
 
 export function featuresArray() {

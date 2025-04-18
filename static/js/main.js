@@ -5,7 +5,7 @@ import {
   feature,
   featuresArray,
   featuresObjects,
-  generateFeatureCheckboxes
+  generateFeatureCheckboxes,
 } from "./features.js";
 
 window.updateSliderValue = updateSliderValue;
@@ -15,8 +15,9 @@ let currentDisplayedFeaturesMap = new Map();
 let stateChoices; // will be created later
 // Set initial display values
 window.onload = function () {
-  document.getElementById("checkbox-container").innerHTML = generateFeatureCheckboxes();
-  document.querySelectorAll(".form-check-input").forEach(input => {
+  document.getElementById("checkbox-container").innerHTML =
+    generateFeatureCheckboxes();
+  document.querySelectorAll(".form-check-input").forEach((input) => {
     input.addEventListener("change", hideShowSlider);
   });
 
@@ -25,21 +26,21 @@ window.onload = function () {
     .getElementById("resultsButton")
     .addEventListener("click", getResults);
 
-    featuresArray().forEach(feature => {
-      addFeature(feature);
-    });
+  featuresArray().forEach((feature) => {
+    addFeature(feature);
+  });
   // add default feature sliders
   // defaultFeaturesArray().forEach((feature) => {
-    // check the box and trigger the 'change' event
-    // document.getElementById(`${feature.id}Checkbox`).click();
+  // check the box and trigger the 'change' event
+  // document.getElementById(`${feature.id}Checkbox`).click();
   // });
 
   //default featureIds
   // let featureIds = defaultFeaturesArray().map((feature) => feature.id);
   // let prefIds = defaultFeaturesArray().map((feature) => feature.id + "-weight");
   // const ids = featureIds
-    // .concat(prefIds);
-    // .concat(["housing-price", "housing-price-weight"]);
+  // .concat(prefIds);
+  // .concat(["housing-price", "housing-price-weight"]);
   // console.log(ids);
   // const ids = [
   // "walkability",
@@ -139,8 +140,40 @@ const test_data = {
 };
 
 function getUserInput() {
-  const input = { ...test_data };
+  // const input = { ...test_data };
+  let input = {};
 
+  // This handles features
+  document
+    .querySelectorAll("div.slider-group:not(.d-none) input.featureSlider")
+    .forEach((elm) => {
+      let value = parseInt(elm.value);
+      let dataFrameKey = elm.getAttribute("dataFrameKey");
+      input[dataFrameKey] = value;
+    });
+
+
+  // This handles features weights, and normalizing all values down to floats, making sure it adds to one
+  let weights = {};
+  let total = 0;
+   document
+    .querySelectorAll("div.slider-group:not(.d-none) input.featureWeightSlider")
+    .forEach((elm) => {
+      let value = parseInt(elm.value);
+      console.log('parsing crrectlye?', value);
+      let dataFrameKey = elm.getAttribute("dataFrameKey");
+      weights[dataFrameKey] = value;
+      total += value;
+    });
+
+    // divide by total so all the values are floats that add up to 1
+    Object.keys(weights).forEach(key => {
+      console.log('total', total);
+      console.log('old ', weights[key]);
+      let scaledValue = weights[key]/total;
+      console.log('new', scaledValue);
+      input[key] = scaledValue;
+    })
   const states = stateChoices.getValue(true); // ["FLORIDA", "TEXAS"]
   // if (states.length) {
   //   input.states = states; // multi-state or single state as a list
@@ -160,7 +193,7 @@ let currentTop10Data = [];
 let activeCountyId = null; // keeps track of the open card
 
 function getResults() {
-  console.log('current features')
+  console.log("current features");
   console.log(currentDisplayedFeaturesMap);
   let userInput = getUserInput();
   console.log("getting results for user input", userInput);
@@ -176,8 +209,8 @@ function getResults() {
   Promise.all([countyStatesPromise, apiPromise]).then((values) => {
     let counties = values[0].objects.counties;
     let ranks = values[1].results;
-    
-    ranks.forEach(r => {
+
+    ranks.forEach((r) => {
       r.fipscode = String(r.fipscode);
     });
 
@@ -507,14 +540,18 @@ function showCountyStats(countyId, evt) {
 }
 
 function hideShowSlider(event) {
-    // convert to feature id
-    // let featureId = event.target.id.replace("Checkbox", "");
-    let featureId = event.target.getAttribute("featureId");
-  if(this.checked) {
+  // convert to feature id
+  // let featureId = event.target.id.replace("Checkbox", "");
+  let featureId = event.target.getAttribute("featureId");
+  if (this.checked) {
     currentDisplayedFeaturesMap.set(featureId, featuresObjects()[featureId]);
-    document.querySelector(`.slider-group:has(#${featureId})`).classList.remove("d-none");
+    document
+      .querySelector(`.slider-group:has(#${featureId})`)
+      .classList.remove("d-none");
   } else {
     currentDisplayedFeaturesMap.delete(featureId);
-    document.querySelector(`.slider-group:has(#${featureId})`).classList.add("d-none");
+    document
+      .querySelector(`.slider-group:has(#${featureId})`)
+      .classList.add("d-none");
   }
 }

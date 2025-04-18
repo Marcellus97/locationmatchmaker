@@ -37,7 +37,7 @@
   <body>
     <div class="left-section">
       <button
-        class="btn btn-primary"
+        class="btn btn-secondary btn-light btn-outline-dark mb-4"
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasRight"
@@ -69,43 +69,6 @@
       </div>
 
       <div id="featuresContainer"> <!-- --> </div>
-      <!-- <div id="featuresContainer">
-        <div class="slider-container">
-          <div class="fw-bold fs-5 mb-2">Housing</div>
-          <label class="d-inline" for="housing-price"
-            >Price
-            <input
-              class="d-inline"
-              type="range"
-              id="housing-price"
-              name="housing-price"
-              min="0"
-              max="1000000"
-              step="1000"
-              value="500000"
-              oninput="updateSliderValue('housing-price')"
-            />
-          </label>
-          <span class="value-display" id="housing-price-value">500000</span>
-        </div>
-
-        <div class="slider-container">
-          <label for="housing-price-weight">Preference</label>
-          <input
-            class="d-inline"
-            type="range"
-            id="housing-price-weight"
-            name="housing-price-weight"
-            min="0"
-            max="10"
-            step="1"
-            value="5"
-            oninput="updateSliderValue('housing-price-weight')"
-          />
-          <span class="value-display" id="housing-price-weight-value">5</span>
-        </div>
-        <hr />
-      </div> -->
 
       <label for="stateDropdown" class="form-label fw-bold mb-1">
         Choose state(s)
@@ -113,7 +76,7 @@
 
       <select id="stateDropdown" class="form-select" multiple></select>
 
-      <button id="resultsButton">Get results</button>
+      <button class="btn btn-primary" id="resultsButton">Get results</button>
     </div>
 
     <div class="right-section">
