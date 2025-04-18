@@ -4,29 +4,42 @@ import {
   addFeature,
   smallFeaturesArray,
   feature,
+  featuresArray,
+  featuresObjects,
+  generateFeatureCheckboxes
 } from "./features.js";
 
 window.updateSliderValue = updateSliderValue;
+
+// keep track of what we have displayed
+let currentDisplayedFeaturesMap = new Map();
 let stateChoices; // will be created later
 // Set initial display values
 window.onload = function () {
+  document.getElementById("checkbox-container").innerHTML = generateFeatureCheckboxes();
+  document.querySelectorAll(".form-check-input").forEach(input => {
+    input.addEventListener("change", hideShowSlider);
+  });
+
   // buttonEventListener
   document
     .getElementById("resultsButton")
     .addEventListener("click", getResults);
 
+    featuresArray().forEach(feature => {
+      addFeature(feature);
+    });
   // add feature sliders
   smallFeaturesArray().forEach((feature) => {
-    addFeature(feature);
+    // check the box and trigger the 'change' event
+    document.getElementById(`${feature.id}Checkbox`).click();
   });
 
   let featureIds = smallFeaturesArray().map((feature) => feature.id);
-  let prefIds = smallFeaturesArray().map(
-    (feature) => feature.id + "-weight"
-  );
+  let prefIds = smallFeaturesArray().map((feature) => feature.id + "-weight");
   const ids = featureIds
-    .concat(prefIds)
-    .concat(["housing-price", "housing-price-weight"]);
+    .concat(prefIds);
+    // .concat(["housing-price", "housing-price-weight"]);
   console.log(ids);
   // const ids = [
   // "walkability",
@@ -68,6 +81,7 @@ var svg = d3
   .select("svg")
   .attr("width", width)
   .attr("height", height)
+  // .attr("viewBox", [0, 0, 500, 500])
   .attr("viewBox", [0, 0, width, height])
   .attr("style", "max-width: 100%; height: auto;");
 
@@ -137,7 +151,7 @@ function getUserInput() {
   // }
 
   input.states = stateChoices.getValue(true);
-  input.median_sale_price = +document.getElementById("housing-price").value;
+  // input.median_sale_price = +document.getElementById("housing-price").value;
   return input;
 }
 
@@ -146,6 +160,8 @@ let currentTop10Data = [];
 let activeCountyId = null; // keeps track of the open card
 
 function getResults() {
+  console.log('current features')
+  console.log(currentDisplayedFeaturesMap);
   let userInput = getUserInput();
   console.log("getting results for user input", userInput);
 
@@ -220,7 +236,6 @@ function getResults() {
 //   });
 // }
 
-
 function updateMap(counties) {
   resetMapCounties();
   highlightMapCounties(counties);
@@ -247,7 +262,7 @@ function resetMapCounties() {
 
 function updateList(ranks) {
   let updatedHtml = "";
-  ranks.sort((a,b) => a.rank - b.rank);
+  ranks.sort((a, b) => a.rank - b.rank);
   ranks.forEach((r) => {
     updatedHtml += `<li class="top10Item" data-county-id="${r.fipscode}">${r.rank} - ${r.COUNTY} - ${r.STATE}</li>`;
   });
@@ -489,4 +504,17 @@ function showCountyStats(countyId, evt) {
   /* re‑apply permanent highlight */
   highlightListItem(countyId); // blue list row
   highlightCountyBorder(countyId); // blue map outline
+}
+
+function hideShowSlider(event) {
+    // convert to feature id
+    // let featureId = event.target.id.replace("Checkbox", "");
+    let featureId = event.target.getAttribute("featureId");
+  if(this.checked) {
+    currentDisplayedFeaturesMap.set(featureId, featuresObjects()[featureId]);
+    document.querySelector(`.slider-group:has(#${featureId})`).classList.remove("d-none");
+  } else {
+    currentDisplayedFeaturesMap.delete(featureId);
+    document.querySelector(`.slider-group:has(#${featureId})`).classList.add("d-none");
+  }
 }
