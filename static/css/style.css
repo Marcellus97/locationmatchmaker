@@ -21,6 +21,7 @@ body {
   flex: 1;
   background-color: #ffffff;
   padding: 20px;
+  position: relative; /* For absolute positioning of county info box */
 }
 
 /* Slider containers */
@@ -66,99 +67,212 @@ input[type="range"] {
 }
 
 /* Highlighted list item */
+.top10Item {
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border-left: 0px solid transparent;
+}
+
+.top10Item:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
 .top10Item.highlighted {
-  background-color: rgba(0, 123, 255, 0.1);
-  /* Light blue background */
+  background-color: rgba(0, 123, 255, 0.15);
   border-left: 4px solid #007bff;
-  /* Blue border */
   padding-left: 8px;
-  /* Adjust padding to account for border */
   font-weight: bold;
-  transition: background-color 0.3s ease, border-left 0.3s ease;
+  transform: translateX(2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 255, 0.1);
+}
+
+/* Top 10 list styling */
+#top10 {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#top10List {
+  list-style-type: none;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 /* Smooth transition for county highlights */
 .county {
-  transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
-}
-
-.county-info-box{
-  position:absolute;          /* we position it dynamically in JS  */
-  z-index:10;                 /* above the SVG                     */
-  min-width:240px;
-  max-width:320px;
-  padding:1rem 1.25rem .75rem;
-  border-radius:.75rem;
-  background:#ffffff;
-  box-shadow:0 4px 12px rgba(0,0,0,.12);
-  font-size:.9rem;
-  line-height:1.35;
-}
-
-.county-info-box h3{
-  margin:0 0 .25rem 0;
-  font-size:1.05rem;
-  font-weight:600;
-}
-
-.ci-row{
-  display:flex;
-  justify-content:space-between;
-  margin:.15rem 0;
-}
-
-.ci-label{ color:#555; font-weight:500; margin-right:.5rem; }
-.ci-value{ font-weight:600; }
-
-.ci-close{
-  position:absolute;
-  right:.6rem; top:.6rem;
-  cursor:pointer;
-  font-size:1.1rem;
-  line-height:1;
-  color:#888;
-  transition:color .2s;
-}
-.ci-close:hover{ color:#000; }
-
-
-/* keep it above the SVG */
-
-
-.choices__inner{
-  border-radius:.375rem;          /* same as .form-select */
-}
-.choices__item--choice{
-  padding:.35rem .75rem;
-}
-.choices__item--selectable{
-  background:#0d6efd;             /* Bootstrap primary */
-  color:#fff;
-  border:0;
-  margin:.15rem .25rem;
-}
-.choices__item--remove{
-  margin-left:.25rem;
-}
-/* limit height of the open list, then make it scroll */
-.choices__list--dropdown{
-  max-height: 260px;         /* adjust to taste */
-  overflow-y: auto;
-}
-
-.county-hover {
-  stroke: #007bff !important; /* Bold blue outline */
-  stroke-width: 3px !important;
-  fill: rgba(0, 123, 255, 0.4) !important; /* More vibrant blue fill */
-  filter: brightness(1.1); /* Subtle brightness increase instead of shadow */
-  z-index: 10; /* Ensure it's on top */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: pointer;
 }
 
-/* Style for counties that are in top 10 but not currently hovered */
+.county-blank {
+  fill: white;
+  stroke: #ddd;
+  stroke-width: 1px;
+}
+
 .county-top10 {
-  stroke: green;
+  stroke: #28a745;
   stroke-width: 2px;
-  fill: rgba(0, 255, 0, 0.2);
+  fill: rgba(40, 167, 69, 0.2);
+}
+
+.county-hover {
+  stroke: #007bff !important;
+  stroke-width: 3px !important;
+  fill: rgba(0, 123, 255, 0.25) !important;
+  filter: drop-shadow(0 0 3px rgba(0, 123, 255, 0.5));
+  transform: scale(1.01);
+  transform-origin: center center;
+  z-index: 10 !important;
+}
+
+/* County info box styling */
+.county-info-box {
+  position: absolute;
+  z-index: 100;
+  min-width: 240px;
+  max-width: 320px;
+  padding: 1rem 1.25rem .75rem;
+  border-radius: .75rem;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  font-size: .9rem;
+  line-height: 1.35;
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.county-info-box.hidden {
+  transform: translateY(10px);
+  opacity: 0;
+}
+
+.county-info-box h3 {
+  margin: 0 0 .5rem 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.ci-row {
+  display: flex;
+  justify-content: space-between;
+  margin: .25rem 0;
+  padding: 4px 0;
+  border-bottom: 1px dotted #f0f0f0;
+}
+
+.ci-label { 
+  color: #555; 
+  font-weight: 500; 
+  margin-right: .75rem; 
+}
+
+.ci-value { 
+  font-weight: 600; 
+  color: #333;
+}
+
+.ci-close {
+  position: absolute;
+  right: .6rem; 
+  top: .6rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #888;
+  transition: all 0.2s;
+  width: 22px;
+  height: 22px;
+  text-align: center;
+  border-radius: 50%;
+}
+
+.ci-close:hover { 
+  color: #000; 
+  background-color: #f0f0f0;
+}
+
+/* Choices.js styling */
+.choices__inner {
+  border-radius: .375rem;
+}
+
+.choices__item--choice {
+  padding: .35rem .75rem;
+}
+
+.choices__item--selectable {
+  background: #0d6efd;
+  color: #fff;
+  border: 0;
+  margin: .15rem .25rem;
+  border-radius: 3px;
+}
+
+.choices__item--remove {
+  margin-left: .25rem;
+}
+
+.choices__list--dropdown {
+  max-height: 260px;
+  overflow-y: auto;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Results button */
+#resultsButton {
+  display: block;
+  width: 100%;
+  padding: 10px 15px;
+  margin-top: 20px;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
   transition: all 0.3s ease;
-} 
+}
+
+#resultsButton:hover {
+  background-color: #0b5ed7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#resultsButton:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Animation keyframes for pulsing effect */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+  }
+}
+
+/* Pulsing animation for newly displayed county info */
+.county-info-box.pulse {
+  animation: pulse 1.5s 1;
+}

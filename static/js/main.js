@@ -275,13 +275,24 @@ function updateMap(counties) {
 }
 
 function highlightMapCounties(counties) {
-  counties.forEach((county) => {
+  counties.forEach((county, index) => {
+    const delay = index * 50; // Stagger the animations
     const countySvg = document.querySelector(`#county-${county.id}`);
     if (countySvg) {
-      countySvg.setAttribute("stroke", "green");
-      countySvg.setAttribute("stroke-width", "2");
-      countySvg.setAttribute("fill", "rgba(0, 255, 0, 0.2)"); // Light green fill
-      countySvg.classList.add("county-top10");
+      // First set initial style without animation
+      countySvg.setAttribute("stroke", "#ddd");
+      countySvg.setAttribute("stroke-width", "1");
+      countySvg.setAttribute("fill", "white");
+      countySvg.classList.add("county-blank");
+      
+      // Then apply the animation with delay
+      setTimeout(() => {
+        countySvg.setAttribute("stroke", "#28a745");
+        countySvg.setAttribute("stroke-width", "2");
+        countySvg.setAttribute("fill", "rgba(40, 167, 69, 0.2)");
+        countySvg.classList.remove("county-blank");
+        countySvg.classList.add("county-top10");
+      }, delay);
     }
   });
 }
@@ -337,7 +348,6 @@ function highlightListItem(countyId) {
     }
   });
 }
-
 // function highlightListItem(countyId) {
 //   // Highlight the corresponding list item
 //   document.querySelectorAll(".top10Item").forEach((item) => {
@@ -350,18 +360,22 @@ function highlightListItem(countyId) {
 // }
 
 function highlightCountyBorder(countyId) {
-  // Highlight the corresponding county and hide others
+  // Highlight the corresponding county with enhanced styling
   document.querySelectorAll(".county").forEach((countySvg) => {
     if (countySvg.id === `county-${countyId}`) {
-      countySvg.setAttribute("stroke", "#007bff"); // Modern blue color
+      countySvg.setAttribute("stroke", "#007bff");
       countySvg.setAttribute("stroke-width", "3");
-      countySvg.setAttribute("fill", "rgba(0, 123, 255, 0.2)"); // Light blue fill
-      countySvg.style.display = "block"; // Ensure the highlighted county is visible
-    } else {
-      // countySvg.style.display = "none"; // Hide other counties
+      countySvg.setAttribute("fill", "rgba(0, 123, 255, 0.25)");
+      countySvg.classList.add("county-hover");
+      
+      // Move this county to be on top of others
+      const parent = countySvg.parentNode;
+      parent.appendChild(countySvg);
     }
   });
 }
+
+
 
 function resetHighlights(top10Geo = []) {
   /* clear hover highlights but KEEP the active one */
@@ -377,6 +391,7 @@ function resetHighlights(top10Geo = []) {
       countySvg.setAttribute("stroke", "#ddd");
       countySvg.setAttribute("stroke-width", "1");
       countySvg.setAttribute("fill", "white");
+      countySvg.classList.remove("county-hover");
     }
   });
 
@@ -384,12 +399,14 @@ function resetHighlights(top10Geo = []) {
   top10Geo.forEach((c) => {
     const id = c.id ?? c.fipscode;
     if (id !== String(activeCountyId)) {
-      // don’t overwrite active
+      // don't overwrite active
       const svg = document.querySelector(`#county-${id}`);
       if (svg) {
-        svg.setAttribute("stroke", "green");
+        svg.setAttribute("stroke", "#28a745");
         svg.setAttribute("stroke-width", "2");
-        svg.setAttribute("fill", "rgba(0,255,0,.2)");
+        svg.setAttribute("fill", "rgba(40, 167, 69, 0.2)");
+        svg.classList.add("county-top10");
+        svg.classList.remove("county-hover");
       }
     }
   });
@@ -428,13 +445,13 @@ function attachMapHoverListeners(top10Geo) {
     const countyId = countySvg.id.replace("county-", "");
 
     countySvg.addEventListener("mouseenter", () => {
-      if (activeCountyId) return; // ⇐ hover disabled when card open
+      if (activeCountyId) return; // ⇐ hover disabled when card open
       highlightListItem(countyId);
       highlightCountyBorder(countyId);
     });
 
     countySvg.addEventListener("mouseleave", () => {
-      if (activeCountyId) return; // ⇐ same guard
+      if (activeCountyId) return; // ⇐ same guard
       resetHighlights(top10Geo);
     });
 
@@ -467,15 +484,20 @@ function getOrCreateInfoBox() {
   if (!box) {
     box = document.createElement("div");
     box.id = "countyInfoBox";
-    box.className = "county-info-box";
+    box.className = "county-info-box hidden";
     box.style.display = "none";
     box.innerHTML = `<span class="ci-close">&times;</span>`; // add X
     document.querySelector(".right-section").appendChild(box);
 
     /* hook the close button */
     box.querySelector(".ci-close").addEventListener("click", () => {
-      box.style.display = "none";
-      activeCountyId = null;
+      // Add fade-out animation
+      box.classList.add("hidden");
+      // Wait for animation to complete before hiding
+      setTimeout(() => {
+        box.style.display = "none";
+        activeCountyId = null;
+      }, 300);
     });
   }
   return box;
@@ -484,8 +506,12 @@ function getOrCreateInfoBox() {
 function showCountyStats(countyId, evt) {
   /* toggle behaviour */
   if (activeCountyId === countyId) {
-    getOrCreateInfoBox().style.display = "none";
-    activeCountyId = null;
+    const box = getOrCreateInfoBox();
+    box.classList.add("hidden");
+    setTimeout(() => {
+      box.style.display = "none";
+      activeCountyId = null;
+    }, 300);
     return;
   }
   activeCountyId = countyId;
@@ -501,23 +527,78 @@ function showCountyStats(countyId, evt) {
 
   /* Build prettier content */
   let body = `<h3>${data.COUNTY}, ${data.STATE}</h3>`;
-  const ignore = ["fipscode", "COUNTY", "STATE"];
+  const ignore = ["fipscode", "COUNTY", "STATE", "rank"];
+  
+  // Group data by categories for better organization
+  const categories = {
+    "Housing": [],
+    "Weather": [],
+    "Expenses": [],
+    "Amenities": [],
+    "Natural Disasters": [],
+    "Other": []
+  };
+  
+  // Sort data into categories
   Object.entries(data).forEach(([k, v]) => {
     if (!ignore.includes(k)) {
       const label = k.replace(/_/g, " ");
-      body += `
-        <div class="ci-row">
-          <span class="ci-label">${label}</span>
-          <span class="ci-value">${v}</span>
-        </div>`;
+      let category = "Other";
+      
+      // Simple categorization based on key names
+      if (k.includes("Housing") || k.includes("home") || k.includes("sale") || k.includes("list")) {
+        category = "Housing";
+      } else if (k.includes("Temperature") || k.includes("Precipitation") || k.includes("Weather")) {
+        category = "Weather";
+      } else if (k.includes("Monthly") || k.includes("cost") || k.includes("price")) {
+        category = "Expenses";
+      } else if (k.includes("Access") || k.includes("Food") || k.includes("Physicians")) {
+        category = "Amenities";
+      } else if (k.includes("risk") || k.includes("Risk") || k.includes("RISK") || k.includes("RESL")) {
+        category = "Natural Disasters";
+      }
+      
+      categories[category].push({
+        key: k,
+        label: label,
+        value: v
+      });
     }
   });
+  
+  // Add rank at the top
+  if (data.rank) {
+    body += `
+      <div class="ci-row" style="background-color: #f8f9fa; padding: 8px; border-radius: 4px; margin-bottom: 12px;">
+        <span class="ci-label">Rank</span>
+        <span class="ci-value" style="color: #007bff; font-size: 1.1em;">#${data.rank}</span>
+      </div>`;
+  }
+  
+  // Add each category and its data
+  for (const [category, items] of Object.entries(categories)) {
+    if (items.length > 0) {
+      body += `<div style="margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #555;">${category}</div>`;
+      
+      items.forEach(item => {
+        body += `
+          <div class="ci-row">
+            <span class="ci-label">${item.label}</span>
+            <span class="ci-value">${item.value}</span>
+          </div>`;
+      });
+    }
+  }
+  
   box.innerHTML = `<span class="ci-close">&times;</span>${body}`;
 
   /* re‑attach close handler (because we just rewrote innerHTML) */
   box.querySelector(".ci-close").addEventListener("click", () => {
-    box.style.display = "none";
-    activeCountyId = null;
+    box.classList.add("hidden");
+    setTimeout(() => {
+      box.style.display = "none";
+      activeCountyId = null;
+    }, 300);
   });
 
   /* Position next to click (inside right‑section bounds) */
@@ -532,7 +613,18 @@ function showCountyStats(countyId, evt) {
   const maxY = right.height - box.offsetHeight - 12;
   box.style.left = `${Math.min(x, maxX)}px`;
   box.style.top = `${Math.min(y, maxY)}px`;
+  
+  // Show with animation
   box.style.display = "block";
+  // Remove hidden class after a brief delay to trigger the animation
+  setTimeout(() => {
+    box.classList.remove("hidden");
+    box.classList.add("pulse");
+    // Remove pulse animation after it completes
+    setTimeout(() => {
+      box.classList.remove("pulse");
+    }, 1500);
+  }, 10);
 
   /* re‑apply permanent highlight */
   highlightListItem(countyId); // blue list row
