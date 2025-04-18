@@ -4,7 +4,7 @@ import os
 from sklearn.preprocessing import MinMaxScaler
 
 # Global debug flag
-DEBUG = True
+DEBUG = False
 
 def debug_print(*args, **kwargs):
     """Print debug messages only if DEBUG is True."""

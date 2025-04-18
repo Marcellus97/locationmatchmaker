@@ -8,6 +8,8 @@ import {
   generateFeatureCheckboxes,
 } from "./features.js";
 
+let gMap;
+
 window.updateSliderValue = updateSliderValue;
 
 // keep track of what we have displayed
@@ -70,6 +72,8 @@ window.onload = function () {
     placeholder: true,
     placeholderValue: "Search or scroll…",
   });
+
+  dropDown.addEventListener("change", () => updateStateHighlights("select"));
 };
 
 /*  D3.JS MAP CODE */
@@ -77,6 +81,14 @@ var margin = 20;
 var width = 1200;
 var height = 800;
 var path = d3.geoPath();
+
+/* ───────── Gradient for ranks 1‥10 ───────── */
+const rankColor = d3
+  .scaleLinear()
+  .domain([1, 5, 10]) // 1 → green, 5 → yellow, 10 → red
+  .range(["#2ecc71", "#f1c40f", "#e74c3c"])
+  .clamp(true);
+/* ─────────────────────────────────────────── */
 
 var svg = d3
   .select("svg")
@@ -94,6 +106,43 @@ Promise.all([countyStatesPromise]).then(ready);
 function ready(values) {
   var countryStates = values[0];
   createMap(countryStates, []);
+  /* ------------------------------------------------------------- *
+   * Zoom + pan                                                    *
+   * ------------------------------------------------------------- */
+  const zoom = d3
+    .zoom()
+    .scaleExtent([1, 8]) // 1× … 8×
+    .translateExtent([
+      [0, 0],
+      [width, height],
+    ]) // stay inside canvas
+    .on("zoom", zoomed);
+
+  svg
+    .call(zoom) // wheel / pinch / dbl‑click
+    .on("dblclick.zoom", null); // disable dbl‑click to zoom
+  d3.select("#zoomIn").on("click", () =>
+    svg.transition().call(zoom.scaleBy, 1.4)
+  );
+  d3.select("#zoomOut").on("click", () =>
+    svg.transition().call(zoom.scaleBy, 1 / 1.4)
+  );
+  d3.select("#zoomReset").on("click", () =>
+    svg.transition().call(zoom.transform, d3.zoomIdentity)
+  );
+
+  function zoomed() {
+    // get the new transform
+    const t = d3.event.transform;
+    // apply it to our map‑layer
+    gMap.attr("transform", t);
+
+    // adjust all stroke widths so they stay 1–2px on screen
+    gMap.selectAll(".county, .states path").attr("stroke-width", function () {
+      const base = +this.dataset.baseStrokeWidth || 1;
+      return base / t.k;
+    });
+  }
 }
 
 function createMap(countryStates, ranks) {
@@ -106,8 +155,13 @@ function createMap(countryStates, ranks) {
     countryStates.objects.states
   ).features;
 
-  svg
+  /* single container that we’ll transform on zoom */
+  gMap = svg.append("g").attr("class", "map-layer");
+
+  /* --- counties --- */
+  gMap
     .append("g")
+    .attr("class", "counties")
     .selectAll("path")
     .data(countyFeatures)
     .enter()
@@ -116,19 +170,21 @@ function createMap(countryStates, ranks) {
     .attr("class", "county county-blank")
     .attr("d", path)
     .attr("fill", "white")
-    .attr("stroke", "#ddd")
-    .exit();
+    .attr("stroke", "#ddd");
 
-  svg
+  /* --- states --- */
+  gMap
     .append("g")
+    .attr("class", "states")
     .selectAll("path")
     .data(stateFeatures)
     .enter()
     .append("path")
+    .attr("id", (d) => "state-" + d.id)
+    .attr("data-name", (d) => d.properties.name.toUpperCase())
     .attr("d", path)
     .attr("fill", "none")
-    .attr("stroke", "black")
-    .exit();
+    .attr("stroke", "black");
 }
 
 const test_data = {
@@ -152,28 +208,27 @@ function getUserInput() {
       input[dataFrameKey] = value;
     });
 
-
   // This handles features weights, and normalizing all values down to floats, making sure it adds to one
   let weights = {};
   let total = 0;
-   document
+  document
     .querySelectorAll("div.slider-group:not(.d-none) input.featureWeightSlider")
     .forEach((elm) => {
       let value = parseInt(elm.value);
-      console.log('parsing crrectlye?', value);
+      console.log("parsing crrectlye?", value);
       let dataFrameKey = elm.getAttribute("dataFrameKey");
       weights[dataFrameKey] = value;
       total += value;
     });
 
-    // divide by total so all the values are floats that add up to 1
-    Object.keys(weights).forEach(key => {
-      console.log('total', total);
-      console.log('old ', weights[key]);
-      let scaledValue = weights[key]/total;
-      console.log('new', scaledValue);
-      input[key] = scaledValue;
-    })
+  // divide by total so all the values are floats that add up to 1
+  Object.keys(weights).forEach((key) => {
+    console.log("total", total);
+    console.log("old ", weights[key]);
+    let scaledValue = weights[key] / total;
+    console.log("new", scaledValue);
+    input[key] = scaledValue;
+  });
   const states = stateChoices.getValue(true); // ["FLORIDA", "TEXAS"]
   // if (states.length) {
   //   input.states = states; // multi-state or single state as a list
@@ -221,7 +276,7 @@ function getResults() {
 
     currentTop10Geo = counties; // geometry
     currentTop10Data = ranks; // all the stats
-    updateMap(counties);
+    updateMap();
     updateList(ranks);
 
     // Highlight the top 10 counties on the map
@@ -230,70 +285,85 @@ function getResults() {
     // // Attach hover listeners for the top 10 counties
     // attachHoverListeners(currentTop10Geo);
     attachMapHoverListeners(currentTop10Geo);
+
+    updateStateHighlights("result");
   });
 }
 
-// function getResults(){
-//   fetch("http://localhost:8080/api/ranking",{
-//       method:"POST",
-//       headers:{ "Content-Type":"application/json" },
-//       body:JSON.stringify(getUserInput())
-//   })
-//   .then(res=>{
-//       if(!res.ok) throw new Error(`Server error ${res.status}`);
-//       return res.json();
-//   })
-//   .then(data=>{
-//       currentTop10Data = data.results;
-//       updateList(currentTop10Data);
+/* ─── make any element draggable by its <h3> header ─────────────── */
+function makeDraggable(el) {
+  const handle = el.querySelector("h3");
+  if (!handle) return; // no header → nothing to do
+  handle.style.cursor = "grab";
 
-//       // geo filter
-//       const counties = countyStatesPromise.then(cjson=>{
-//         const all = cjson.objects.counties;
-//         return all.geometries.filter(g =>
-//           currentTop10Data.some(r => r.fipscode.toString() === g.id)
-//         );
-//       });
+  handle.addEventListener("mousedown", (e) => {
+    e.preventDefault();
 
-//       counties.then(geos=>{
-//         currentTop10Geo = geos;
-//         updateMap(geos);
-//         highlightMapCounties(geos);
-//         attachHoverListeners(currentTop10Geo);
-//         attachMapHoverListeners(currentTop10Geo);
-//       });
-//   })
-//   .catch(err=>{
-//       console.error(err);
-//       alert("Server error – see console for details.");
-//   });
-// }
+    /* starting point */
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const origLeft = parseInt(el.style.left) || 0;
+    const origTop = parseInt(el.style.top) || 0;
 
-function updateMap(counties) {
-  resetMapCounties();
-  highlightMapCounties(counties);
+    el.classList.add("dragging");
+    handle.style.cursor = "grabbing";
+
+    /* move */
+    function dragMove(ev) {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      el.style.left = origLeft + dx + "px";
+      el.style.top = origTop + dy + "px";
+    }
+    /* stop */
+    function dragEnd() {
+      document.removeEventListener("mousemove", dragMove);
+      document.removeEventListener("mouseup", dragEnd);
+      el.classList.remove("dragging");
+      handle.style.cursor = "grab";
+    }
+
+    document.addEventListener("mousemove", dragMove);
+    document.addEventListener("mouseup", dragEnd);
+  });
 }
 
-function highlightMapCounties(counties) {
-  counties.forEach((county, index) => {
-    const delay = index * 50; // Stagger the animations
-    const countySvg = document.querySelector(`#county-${county.id}`);
-    if (countySvg) {
-      // First set initial style without animation
-      countySvg.setAttribute("stroke", "#ddd");
-      countySvg.setAttribute("stroke-width", "1");
-      countySvg.setAttribute("fill", "white");
-      countySvg.classList.add("county-blank");
-      
-      // Then apply the animation with delay
-      setTimeout(() => {
-        countySvg.setAttribute("stroke", "#28a745");
-        countySvg.setAttribute("stroke-width", "2");
-        countySvg.setAttribute("fill", "rgba(40, 167, 69, 0.2)");
-        countySvg.classList.remove("county-blank");
-        countySvg.classList.add("county-top10");
-      }, delay);
-    }
+function updateMap() {
+  resetMapCounties();
+  highlightMapCounties(currentTop10Data);
+}
+
+function highlightMapCounties(ranks) {
+  ranks.forEach((r, i) => {
+    const countySvg = document.querySelector(`#county-${r.fipscode}`);
+    if (!countySvg) return;
+
+    const delay = i * 50;
+    const strokeCol = rankColor(r.rank); // green → yellow → red
+
+    /* build a semi‑transparent fill */
+    const fillCol = d3.color(strokeCol);
+    if (fillCol) fillCol.opacity = 0.25; // 25 % alpha
+
+    // reset first
+    countySvg.setAttribute("class", "county county-blank");
+    countySvg.setAttribute("stroke", "#ddd");
+    countySvg.setAttribute("stroke-width", "1");
+    countySvg.setAttribute("fill", "white");
+
+    /* delayed entrance */
+    setTimeout(() => {
+      countySvg.setAttribute("stroke", strokeCol);
+      countySvg.setAttribute("stroke-width", "2");
+      countySvg.setAttribute("fill", fillCol + "");
+      countySvg.classList.remove("county-blank");
+      countySvg.classList.add("county-top10");
+
+      /* NEW ─ store the colours so we can restore later */
+      countySvg.dataset.baseStrokeWidth = 2; // or 3 etc.
+      countySvg.dataset.baseStroke = strokeCol;
+      countySvg.dataset.baseFill = fillCol + "";
+    }, delay);
   });
 }
 
@@ -358,24 +428,18 @@ function highlightListItem(countyId) {
 //     }
 //   });
 // }
-
 function highlightCountyBorder(countyId) {
-  // Highlight the corresponding county with enhanced styling
   document.querySelectorAll(".county").forEach((countySvg) => {
     if (countySvg.id === `county-${countyId}`) {
       countySvg.setAttribute("stroke", "#007bff");
-      countySvg.setAttribute("stroke-width", "3");
+      countySvg.setAttribute("stroke-width", "2");
       countySvg.setAttribute("fill", "rgba(0, 123, 255, 0.25)");
-      countySvg.classList.add("county-hover");
-      
-      // Move this county to be on top of others
+      countySvg.classList.add("county-hover", "county-zoom");
       const parent = countySvg.parentNode;
       parent.appendChild(countySvg);
     }
   });
 }
-
-
 
 function resetHighlights(top10Geo = []) {
   /* clear hover highlights but KEEP the active one */
@@ -391,24 +455,30 @@ function resetHighlights(top10Geo = []) {
       countySvg.setAttribute("stroke", "#ddd");
       countySvg.setAttribute("stroke-width", "1");
       countySvg.setAttribute("fill", "white");
-      countySvg.classList.remove("county-hover");
+      countySvg.classList.remove("county-hover", "county-zoom");
     }
   });
 
-  /* restore the original green outlines on the top‑10 set */
+  /* restore the original gradient stroke/fill on each top‑10 county */
   top10Geo.forEach((c) => {
     const id = c.id ?? c.fipscode;
-    if (id !== String(activeCountyId)) {
-      // don't overwrite active
-      const svg = document.querySelector(`#county-${id}`);
-      if (svg) {
-        svg.setAttribute("stroke", "#28a745");
-        svg.setAttribute("stroke-width", "2");
-        svg.setAttribute("fill", "rgba(40, 167, 69, 0.2)");
-        svg.classList.add("county-top10");
-        svg.classList.remove("county-hover");
-      }
+    const svg = document.querySelector(`#county-${id}`);
+    if (!svg) return;
+
+    /* keep active one blue & zoomed – others go back to gradient */
+    if (String(activeCountyId) === String(id)) {
+      svg.classList.add("county-zoom"); // stay popped‑out
+      return;
     }
+
+    const stroke = svg.dataset.baseStroke || "#28a745";
+    const fill = svg.dataset.baseFill || "rgba(40,167,69,.2)";
+
+    svg.setAttribute("stroke", stroke);
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("fill", fill);
+    svg.classList.remove("county-hover", "county-zoom");
+    svg.classList.add("county-top10");
   });
 
   /* finally, make sure the active one stays blue */
@@ -499,6 +569,7 @@ function getOrCreateInfoBox() {
         activeCountyId = null;
       }, 300);
     });
+    makeDraggable(box); // ← NEW
   }
   return box;
 }
@@ -511,6 +582,9 @@ function showCountyStats(countyId, evt) {
     setTimeout(() => {
       box.style.display = "none";
       activeCountyId = null;
+      document
+        .querySelectorAll(".county-zoom")
+        .forEach((el) => el.classList.remove("county-zoom"));
     }, 300);
     return;
   }
@@ -528,44 +602,66 @@ function showCountyStats(countyId, evt) {
   /* Build prettier content */
   let body = `<h3>${data.COUNTY}, ${data.STATE}</h3>`;
   const ignore = ["fipscode", "COUNTY", "STATE", "rank"];
-  
+
   // Group data by categories for better organization
   const categories = {
-    "Housing": [],
-    "Weather": [],
-    "Expenses": [],
-    "Amenities": [],
+    Housing: [],
+    Weather: [],
+    Expenses: [],
+    Amenities: [],
     "Natural Disasters": [],
-    "Other": []
+    Other: [],
   };
-  
+
   // Sort data into categories
   Object.entries(data).forEach(([k, v]) => {
     if (!ignore.includes(k)) {
       const label = k.replace(/_/g, " ");
       let category = "Other";
-      
+
       // Simple categorization based on key names
-      if (k.includes("Housing") || k.includes("home") || k.includes("sale") || k.includes("list")) {
+      if (
+        k.includes("Housing") ||
+        k.includes("home") ||
+        k.includes("sale") ||
+        k.includes("list")
+      ) {
         category = "Housing";
-      } else if (k.includes("Temperature") || k.includes("Precipitation") || k.includes("Weather")) {
+      } else if (
+        k.includes("Temperature") ||
+        k.includes("Precipitation") ||
+        k.includes("Weather")
+      ) {
         category = "Weather";
-      } else if (k.includes("Monthly") || k.includes("cost") || k.includes("price")) {
+      } else if (
+        k.includes("Monthly") ||
+        k.includes("cost") ||
+        k.includes("price")
+      ) {
         category = "Expenses";
-      } else if (k.includes("Access") || k.includes("Food") || k.includes("Physicians")) {
+      } else if (
+        k.includes("Access") ||
+        k.includes("Food") ||
+        k.includes("Physicians")
+      ) {
         category = "Amenities";
-      } else if (k.includes("risk") || k.includes("Risk") || k.includes("RISK") || k.includes("RESL")) {
+      } else if (
+        k.includes("risk") ||
+        k.includes("Risk") ||
+        k.includes("RISK") ||
+        k.includes("RESL")
+      ) {
         category = "Natural Disasters";
       }
-      
+
       categories[category].push({
         key: k,
         label: label,
-        value: v
+        value: v,
       });
     }
   });
-  
+
   // Add rank at the top
   if (data.rank) {
     body += `
@@ -574,13 +670,13 @@ function showCountyStats(countyId, evt) {
         <span class="ci-value" style="color: #007bff; font-size: 1.1em;">#${data.rank}</span>
       </div>`;
   }
-  
+
   // Add each category and its data
   for (const [category, items] of Object.entries(categories)) {
     if (items.length > 0) {
       body += `<div style="margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #555;">${category}</div>`;
-      
-      items.forEach(item => {
+
+      items.forEach((item) => {
         body += `
           <div class="ci-row">
             <span class="ci-label">${item.label}</span>
@@ -589,8 +685,9 @@ function showCountyStats(countyId, evt) {
       });
     }
   }
-  
+
   box.innerHTML = `<span class="ci-close">&times;</span>${body}`;
+  makeDraggable(box);
 
   /* re‑attach close handler (because we just rewrote innerHTML) */
   box.querySelector(".ci-close").addEventListener("click", () => {
@@ -598,6 +695,9 @@ function showCountyStats(countyId, evt) {
     setTimeout(() => {
       box.style.display = "none";
       activeCountyId = null;
+      document
+        .querySelectorAll(".county-zoom")
+        .forEach((el) => el.classList.remove("county-zoom"));
     }, 300);
   });
 
@@ -613,7 +713,7 @@ function showCountyStats(countyId, evt) {
   const maxY = right.height - box.offsetHeight - 12;
   box.style.left = `${Math.min(x, maxX)}px`;
   box.style.top = `${Math.min(y, maxY)}px`;
-  
+
   // Show with animation
   box.style.display = "block";
   // Remove hidden class after a brief delay to trigger the animation
@@ -646,4 +746,26 @@ function hideShowSlider(event) {
       .querySelector(`.slider-group:has(#${featureId})`)
       .classList.add("d-none");
   }
+}
+
+function updateStateHighlights(phase = "select") {
+  /* phase: "select" → blue, "result" → green                         */
+  const selected = new Set(
+    stateChoices.getValue(true).map((s) => s.toUpperCase())
+  );
+
+  /* clear previous highlights */
+  d3.selectAll(".state-selected, .state-result")
+    .classed("state-selected", false)
+    .classed("state-result", false);
+
+  /* “all states” (empty list) → nothing to highlight */
+  if (!selected.size) return;
+
+  d3.selectAll("path[data-name]")
+    .filter(function () {
+      return selected.has(this.dataset.name);
+    })
+    .classed("state-selected", phase === "select")
+    .classed("state-result", phase === "result");
 }

@@ -1,4 +1,15 @@
 /* styles.css */
+.zoom‑ctrl{
+  position:absolute;   right:18px;  top:18px;  z-index:12;
+  display:flex;  flex-direction:column;  gap:4px;
+}
+.zoom‑ctrl button{
+  width:34px;  height:34px;  font-size:20px;
+  border:none; border-radius:4px;  background:#fafafa;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
+  cursor:pointer;  transition:background .2s;
+}
+.zoom‑ctrl button:hover{ background:#eaeaea; }
 
 /* Overall body styling */
 body {
@@ -105,6 +116,16 @@ input[type="range"] {
   overflow-y: auto;
 }
 
+.state-selected{
+  stroke:#0d6efd;          /* bootstrap blue */
+  stroke-width:3;
+}
+
+.state-result{
+  stroke:#28a745;          /* bootstrap green */
+  stroke-width:3;
+}
+
 /* Smooth transition for county highlights */
 .county {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -116,25 +137,33 @@ input[type="range"] {
   stroke: #ddd;
   stroke-width: 1px;
 }
+/* pop‑out effect for counties */
+.county-zoom{
+  transform-box: fill-box;      /* respect each path’s bbox            */
+  transform-origin: center;
+  transform: scale(1.1);       /* ≈ 8 % bigger                        */
+  filter: drop-shadow(0 0 4px rgba(0,0,0,.30));
+  transition: transform .18s ease;
+}
 
 .county-top10 {
-  stroke: #28a745;
+  /* stroke: #28a745;
   stroke-width: 2px;
-  fill: rgba(40, 167, 69, 0.2);
+  fill: rgba(40, 167, 69, 0.2); */
+  transition: fill .3s ease, stroke .3s ease, stroke-width .3s ease;
 }
 
 .county-hover {
   stroke: #007bff !important;
-  stroke-width: 3px !important;
+  stroke-width: 6px !important;
   fill: rgba(0, 123, 255, 0.25) !important;
   filter: drop-shadow(0 0 3px rgba(0, 123, 255, 0.5));
-  transform: scale(1.01);
   transform-origin: center center;
   z-index: 10 !important;
 }
 
 /* County info box styling */
-.county-info-box {
+/* .county-info-box {
   position: absolute;
   z-index: 100;
   min-width: 240px;
@@ -149,6 +178,43 @@ input[type="range"] {
   opacity: 1;
   transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(0,0,0,0.1);
+} */
+
+/* draggable card tweaks */
+.county-info-box{
+  position:absolute;
+  z-index:20;
+  min-width:260px;
+  max-width:340px;
+  max-height:20vh;       /* ←  makes it scroll if content is long  */
+  overflow-y:auto;       /* ←  … scrollable                        */
+  padding:1rem 1.25rem .75rem;
+  border-radius:.75rem;
+  background:#ffffff;
+  box-shadow:0 6px 14px rgba(0,0,0,.18);
+  font-size:.9rem;
+  line-height:1.35;
+  user-select:none;      /* nicer while dragging                   */
+}
+
+.county-info-box.dragging{
+  opacity:.90;           /* slight feedback while moving           */
+  cursor:grabbing;
+}
+/* .county-info-box h3 {
+  margin: 0 0 .5rem 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+} */
+
+.county-info-box h3{
+  margin:0 0 .3rem 0;
+  font-size:1.05rem;
+  font-weight:600;
+  cursor:grab;           /* drag handle                            */
 }
 
 .county-info-box.hidden {
@@ -156,14 +222,6 @@ input[type="range"] {
   opacity: 0;
 }
 
-.county-info-box h3 {
-  margin: 0 0 .5rem 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #333;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-}
 
 .ci-row {
   display: flex;
