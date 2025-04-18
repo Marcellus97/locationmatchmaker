@@ -36,10 +36,40 @@
   </head>
   <body>
     <div class="left-section">
-      <div id="checkbox-container">
-        <!-- -->
+      <button
+        class="btn btn-primary"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasRight"
+        aria-controls="offcanvasRight"
+      >
+        Edit Features
+      </button>
+
+      <div
+        class="offcanvas offcanvas-end"
+        tabindex="-1"
+        id="offcanvasRight"
+        aria-labelledby="offcanvasRightLabel"
+      >
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasRightLabel">
+            Select Your Features
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div id="checkbox-container" class="offcanvas-body">
+          <!-- -->
+        </div>
       </div>
-      <div id="featuresContainer">
+
+      <div id="featuresContainer"> <!-- --> </div>
+      <!-- <div id="featuresContainer">
         <div class="slider-container">
           <div class="fw-bold fs-5 mb-2">Housing</div>
           <label class="d-inline" for="housing-price"
@@ -75,7 +105,7 @@
           <span class="value-display" id="housing-price-weight-value">5</span>
         </div>
         <hr />
-      </div>
+      </div> -->
 
       <label for="stateDropdown" class="form-label fw-bold mb-1">
         Choose state(s)

@@ -6,15 +6,14 @@ import {
   feature,
   featuresArray,
   featuresObjects,
-  hideShowSlider,
   generateFeatureCheckboxes
 } from "./features.js";
 
 window.updateSliderValue = updateSliderValue;
-window.hideShowSlider = hideShowSlider;
 
+// keep track of what we have displayed
+let currentDisplayedFeaturesMap = new Map();
 let stateChoices; // will be created later
-let featureChoices; // will be created later
 // Set initial display values
 window.onload = function () {
   document.getElementById("checkbox-container").innerHTML = generateFeatureCheckboxes();
@@ -27,16 +26,20 @@ window.onload = function () {
     .getElementById("resultsButton")
     .addEventListener("click", getResults);
 
+    featuresArray().forEach(feature => {
+      addFeature(feature);
+    });
   // add feature sliders
   smallFeaturesArray().forEach((feature) => {
-    addFeature(feature);
+    // check the box and trigger the 'change' event
+    document.getElementById(`${feature.id}Checkbox`).click();
   });
 
   let featureIds = smallFeaturesArray().map((feature) => feature.id);
   let prefIds = smallFeaturesArray().map((feature) => feature.id + "-weight");
   const ids = featureIds
-    .concat(prefIds)
-    .concat(["housing-price", "housing-price-weight"]);
+    .concat(prefIds);
+    // .concat(["housing-price", "housing-price-weight"]);
   console.log(ids);
   // const ids = [
   // "walkability",
@@ -148,7 +151,7 @@ function getUserInput() {
   // }
 
   input.states = stateChoices.getValue(true);
-  input.median_sale_price = +document.getElementById("housing-price").value;
+  // input.median_sale_price = +document.getElementById("housing-price").value;
   return input;
 }
 
@@ -157,6 +160,8 @@ let currentTop10Data = [];
 let activeCountyId = null; // keeps track of the open card
 
 function getResults() {
+  console.log('current features')
+  console.log(currentDisplayedFeaturesMap);
   let userInput = getUserInput();
   console.log("getting results for user input", userInput);
 
@@ -495,4 +500,17 @@ function showCountyStats(countyId, evt) {
   /* re‑apply permanent highlight */
   highlightListItem(countyId); // blue list row
   highlightCountyBorder(countyId); // blue map outline
+}
+
+function hideShowSlider(event) {
+    // convert to feature id
+    // let featureId = event.target.id.replace("Checkbox", "");
+    let featureId = event.target.getAttribute("featureId");
+  if(this.checked) {
+    currentDisplayedFeaturesMap.set(featureId, featuresObjects()[featureId]);
+    document.querySelector(`.slider-group:has(#${featureId})`).classList.remove("d-none");
+  } else {
+    currentDisplayedFeaturesMap.delete(featureId);
+    document.querySelector(`.slider-group:has(#${featureId})`).classList.add("d-none");
+  }
 }

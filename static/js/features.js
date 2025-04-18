@@ -8,21 +8,6 @@ export function updateSliderValue(id) {
   }
 }
 
-export function hideShowSlider(event) {
-    // convert to feature id
-    let featureId = event.target.id.replace("Checkbox", "");
-  if(this.checked) {
-    // document.querySelector(`.slider-group:has(#${featureId})`).style.display = true;
-    console.log(featureId)
-    let obj = featuresObjects()[featureId];
-    console.log(obj)
-    addFeature(obj); 
-  } else {
-    //hide
-    document.querySelector(`.slider-group:has(#${featureId})`).style.display = 'none';
-  }
-}
-
 export function feature(featureParameters) {
   const {
     name,
@@ -37,7 +22,7 @@ export function feature(featureParameters) {
   const valueId = id + "-value";
   const weightValueId = weightId + "-value";
   return `
-  <div class="slider-group">
+  <div class="slider-group d-none">
       <div class="slider-container">
         <div class="fw-bold fs-5 mb-2">${category}</div>
         <label class="d-inline" for="${id}"
@@ -77,6 +62,15 @@ export function feature(featureParameters) {
     `;
 }
 
+export function getCurrentDisplayedFeatureSliders() {
+  Object.values(featuresObjects()).filter(feature => {
+
+    document.querySelector('div:not(.d-none) input[name="numAdults"])');
+  })
+  
+
+}
+
 export function generateFeatureCheckboxes() {
   const features = featuresArray();
 
@@ -85,7 +79,7 @@ export function generateFeatureCheckboxes() {
   features.forEach((feature) => {
     html += `
       <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="${feature.id}Checkbox">
+        <input class="form-check-input" type="checkbox" id="${feature.id}Checkbox" featureId=${feature.id}>
         <label class="form-check-label" for="${feature.id}Checkbox">
           ${feature.name}
         </label>
