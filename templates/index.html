@@ -37,7 +37,7 @@
   <body>
     <div class="left-section">
       <button
-        class="btn btn-secondary btn-light btn-outline-dark mb-4"
+        class="btn btn-secondary btn-light btn-outline-dark mb-4 w-100"
         type="button"
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasRight"
@@ -45,6 +45,11 @@
       >
         Edit Features
       </button>
+      <p class="fw-light text-secondary fst-italic">
+        Unless specified, all measuresments are
+        <span class="fw-bold">averages</span>
+      </p>
+      <hr />
 
       <div
         class="offcanvas offcanvas-end"
@@ -68,7 +73,7 @@
         </div>
       </div>
 
-      <div id="featuresContainer"> <!-- --> </div>
+      <div id="featuresContainer"><!-- --></div>
 
       <label for="stateDropdown" class="form-label fw-bold mb-1">
         Choose state(s)
@@ -85,10 +90,14 @@
         class="county-info-box"
         style="display: none"
       ></div>
-      <h1>Welcome</h1>
-      <p>
-        This is the right section of the page. You can use the sliders on the
-        left to adjust your preferences.
+      <h1>Location MatchMaker</h1>
+      <p class="me-5">
+        Find the county the USA that is right for you! Start by adding features
+        on the left.
+        <br />
+        Adjust the preferred value, and the weight, or "importance" compared to
+        other features. Click Get Results to explore your dream counties on the
+        interactive map!
       </p>
       <svg id="choropleth"></svg>
       <div id="zoomControls" class="zoom‑ctrl">
@@ -96,7 +105,7 @@
         <button id="zoomOut">－</button>
         <button id="zoomReset">⤾</button>
       </div>
-      
+
       <div id="top10">
         <h2>Top 10</h2>
         <ul id="top10List">
