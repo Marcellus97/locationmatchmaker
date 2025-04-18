@@ -2,7 +2,6 @@ import { getStates } from "./states.js";
 import {
   updateSliderValue,
   addFeature,
-  smallFeaturesArray,
   feature,
   featuresArray,
   featuresObjects,
@@ -29,18 +28,19 @@ window.onload = function () {
     featuresArray().forEach(feature => {
       addFeature(feature);
     });
-  // add feature sliders
-  smallFeaturesArray().forEach((feature) => {
+  // add default feature sliders
+  // defaultFeaturesArray().forEach((feature) => {
     // check the box and trigger the 'change' event
-    document.getElementById(`${feature.id}Checkbox`).click();
-  });
+    // document.getElementById(`${feature.id}Checkbox`).click();
+  // });
 
-  let featureIds = smallFeaturesArray().map((feature) => feature.id);
-  let prefIds = smallFeaturesArray().map((feature) => feature.id + "-weight");
-  const ids = featureIds
-    .concat(prefIds);
+  //default featureIds
+  // let featureIds = defaultFeaturesArray().map((feature) => feature.id);
+  // let prefIds = defaultFeaturesArray().map((feature) => feature.id + "-weight");
+  // const ids = featureIds
+    // .concat(prefIds);
     // .concat(["housing-price", "housing-price-weight"]);
-  console.log(ids);
+  // console.log(ids);
   // const ids = [
   // "walkability",
   // "density",
@@ -50,7 +50,7 @@ window.onload = function () {
   // "housing-weight",
   // "job-prospects",
   // ];
-  ids.forEach((id) => updateSliderValue(id));
+  // ids.forEach((id) => updateSliderValue(id));
   const dropDown = document.getElementById("stateDropdown");
   let updatedDropDownHtml = "";
   getStates().forEach((s) => {
