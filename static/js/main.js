@@ -253,7 +253,7 @@ function getResults() {
   let userInput = getUserInput();
   console.log("getting results for user input", userInput);
 
-  const apiPromise = fetch("http://localhost:8080/api/ranking", {
+  const apiPromise = fetch("/api/ranking", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
