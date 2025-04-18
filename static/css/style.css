@@ -81,12 +81,11 @@ input[type="range"] {
 }
 
 .top10Item.highlighted {
-  background-color: rgba(0, 123, 255, 0.15);
-  border-left: 4px solid #007bff;
+  background-color: rgba(0, 86, 179, 0.1);
+  border-left: 4px solid #0056b3;
   padding-left: 8px;
   font-weight: bold;
-  transform: translateX(2px);
-  box-shadow: 0 2px 5px rgba(0, 0, 255, 0.1);
+  transition: background-color 0.3s ease, border-left 0.3s ease;
 }
 
 /* Top 10 list styling */
@@ -118,19 +117,19 @@ input[type="range"] {
 }
 
 .county-top10 {
-  stroke: #28a745;
+  stroke: #228B22; /* Forest green instead of basic green */
   stroke-width: 2px;
-  fill: rgba(40, 167, 69, 0.2);
+  fill: rgba(34, 139, 34, 0.15); /* Slightly more transparent green */
+  transition: all 0.3s ease;
 }
 
 .county-hover {
-  stroke: #007bff !important;
+  stroke: #0056b3 !important; /* Darker, more saturated blue */
   stroke-width: 3px !important;
-  fill: rgba(0, 123, 255, 0.25) !important;
-  filter: drop-shadow(0 0 3px rgba(0, 123, 255, 0.5));
-  transform: scale(1.01);
-  transform-origin: center center;
-  z-index: 10 !important;
+  fill: rgba(0, 86, 179, 0.3) !important; /* More saturated blue with better opacity */
+  z-index: 10; /* Ensure it's on top */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out; /* Smoother transition */
 }
 
 /* County info box styling */
