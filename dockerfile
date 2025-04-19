@@ -1,17 +1,19 @@
-FROM python:3.13-slim
+FROM python:3.11-slim
+
+# Upgrade pip so we get the latest wheel resolver
+RUN pip install --upgrade pip
 
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy only requirements, then install
+COPY requirements.txt ./
+RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
-# Copy necessary files
-# Note: Your actual data files will be mounted as a volume
-# as specified in docker-compose.yml
+# Copy your app code
+COPY . .
 
-# Set environment variables
 ENV PYTHONUNBUFFERED=1
-
-# Expose the port used by the application
 EXPOSE 8080
+
+CMD ["gunicorn", "-k", "gevent", "-w", "4", "-b", "0.0.0.0:8080", "api:app"]
+

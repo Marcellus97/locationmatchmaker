@@ -10,7 +10,16 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     # Comment this line for running the container interactively 
-    command: python api.py
+    command:
+      - gunicorn
+      - -k
+      - gevent
+      - -w
+      - "4"
+      - -b
+      - "0.0.0.0:8080"
+      - api:app
+
 
     # Uncomment the following lines if you want to run the container interactively
     # tty: true
