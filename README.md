@@ -1,5 +1,8 @@
 # DVA Project
 
+Link to github repo
+https://github.gatech.edu/snima3/dva-Project
+
 ## Overview
 
 Location Matchmaker is web visualization tool to assist you in finding a new place to live. The tool is connected with rich datasets to be a one-stop-shop for location research. It is highly customizable, and displays data at the county level for all 50 US states.
