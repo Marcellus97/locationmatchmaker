@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a Python-based web application that uses `gunicorn` as the WSGI HTTP server and `gevent` for asynchronous workers. The application is containerized using Docker, making it easy to deploy and run in any environment. The app listens on port `8080` and is defined in the `api:app` module.
+This project is a Python-based web application that uses `gunicorn` as the WSGI HTTP server and `gevent` for asynchronous workers. The application is containerized using Docker, making it easy to deploy and run in any environment. The app listens on port `8080` and is defined in the `api:app` module. The visualization is powered by d3.js and bootstrap for styling.
 
 ## Prerequisites
 
