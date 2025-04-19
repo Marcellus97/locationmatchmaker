@@ -1,4 +1,4 @@
-# DVA Project
+# DVA Project - Team 019
 
 Link to github repo
 https://github.gatech.edu/snima3/dva-Project
@@ -13,6 +13,65 @@ This project is a Python-based web application that uses `gunicorn` as the WSGI 
 See this [Youtube video](https://youtu.be/g5X8BfC0dlE) to view it in action!
 
 ## Prerequisites
+
+### Install Python
+
+Download and install the latest version of Python from the official website:
+
+https://www.python.org/downloads/
+
+> Make sure to check the box **"Add Python to PATH"** during installation.
+
+To confirm installation, run:
+
+```bash
+python --version
+```
+
+or
+
+```bash
+python3 --version
+```
+
+### Create a Virtual Environment
+
+Navigate to your project directory and run:
+
+```bash
+python -m venv venv
+```
+
+or
+
+```bash
+python3 -m venv venv
+```
+
+Activate the virtual environment:
+
+- **Windows:**
+
+  ```bash
+  venv\Scripts\activate
+  ```
+
+- **macOS/Linux:**
+
+  ```bash
+  source venv/bin/activate
+  ```
+
+You’ll know the virtual environment is active when you see `(venv)` in your terminal prompt.
+
+### Install Dependencies
+
+With the virtual environment activated, install the required packages:
+
+```bash
+pip install -r requirements.txt
+```
+
 
 Before running the project, ensure you have Docker and Docker Compose installed on your system. You can find installation instructions for your operating system below:
 
