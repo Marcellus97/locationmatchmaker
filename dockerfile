@@ -15,5 +15,5 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
 
-CMD ["gunicorn", "-k", "gevent", "-w", "4", "-b", "0.0.0.0:8080", "api:app"]
+CMD ["gunicorn", "-k", "gevent", "-w", "1", "--preload", "-b", "0.0.0.0:8080", "api:app"]
 
