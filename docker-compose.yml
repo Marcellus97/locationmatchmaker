@@ -15,7 +15,8 @@ services:
       - -k
       - gevent
       - -w
-      - "4"
+      - "1"
+      - "--preload"
       - -b
       - "0.0.0.0:8080"
       - api:app
