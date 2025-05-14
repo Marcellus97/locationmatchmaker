@@ -2,13 +2,13 @@
 import os
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
+# from flask_cors import CORS
 from final_data_and_ranking_algorithm import compute_ranking
 
 # ── App setup ────────────────────────────────────────────────────────────────
 BASE = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder="static", template_folder="templates")
-CORS(app)
+# CORS(app)
 
 # ── Routes ──────────────────────────────────────────────────────────────────
 @app.route("/", methods=["GET"])
