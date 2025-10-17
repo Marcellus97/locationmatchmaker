@@ -127,8 +127,6 @@ input[type="range"] {
 #top10List {
   list-style-type: none;
   padding: 0;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
 .state-selected {

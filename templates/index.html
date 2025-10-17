@@ -35,7 +35,18 @@
     <script src="/static/js/main.js" type="module"></script>
   </head>
   <body>
-    <div class="left-section">
+    <div class="left-section overflow-scroll">
+
+      <h1>Location MatchMaker</h1>
+      <p class="me-5">
+        Find the county the USA that is right for you! Start by adding features
+        on the left.
+        <br />
+        Adjust the preferred value, and the weight, or "importance" compared to
+        other features. Click Get Results to explore your dream counties on the
+        interactive map!
+      </p>
+
       <button
         class="btn btn-secondary btn-light btn-outline-dark mb-4 w-100"
         type="button"
@@ -78,6 +89,15 @@
       <select id="stateDropdown" class="form-select" multiple></select>
 
       <button class="btn btn-primary" id="resultsButton">Get results</button>
+
+
+      <hr>
+      <div id="top10">
+        <h2>Top 10</h2>
+        <ul id="top10List">
+          <!-- -->
+        </ul>
+      </div>
     </div>
 
     <div class="right-section">
@@ -86,15 +106,7 @@
         class="county-info-box"
         style="display: none"
       ></div>
-      <h1>Location MatchMaker</h1>
-      <p class="me-5">
-        Find the county the USA that is right for you! Start by adding features
-        on the left.
-        <br />
-        Adjust the preferred value, and the weight, or "importance" compared to
-        other features. Click Get Results to explore your dream counties on the
-        interactive map!
-      </p>
+
       <svg id="choropleth"></svg>
       <div id="zoomControls" class="zoom‑ctrl">
         <button id="zoomIn">＋</button>
@@ -102,12 +114,7 @@
         <button id="zoomReset">⤾</button>
       </div>
 
-      <div id="top10">
-        <h2>Top 10</h2>
-        <ul id="top10List">
-          <!-- -->
-        </ul>
-      </div>
+
     </div>
   </body>
 </html>
