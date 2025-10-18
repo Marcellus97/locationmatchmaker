@@ -17,7 +17,7 @@ let currentDisplayedFeaturesMap = new Map();
 let stateChoices; // will be created later
 // Set initial display values
 window.onload = function () {
-  document.getElementById("checkbox-container").innerHTML =
+  document.getElementById("checkbox-container").innerHTML +=
     generateFeatureCheckboxes();
   document.querySelectorAll(".form-check-input").forEach((input) => {
     input.addEventListener("change", hideShowSlider);

@@ -296,8 +296,6 @@ input[type="range"] {
 }
 
 .choices__item--selectable {
-  background: #0d6efd;
-  color: #fff;
   border: 0;
   margin: .15rem .25rem;
   border-radius: 3px;
