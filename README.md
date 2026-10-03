@@ -1,6 +1,6 @@
 # DVA Project - Team 019
 
-[https://locationmatchmaker.com](https://locationmatchmaker.marcellus.dev/)
+https://locationmatchmaker.marcellus.dev/
 
 Link to github repo
 https://github.gatech.edu/snima3/dva-Project
